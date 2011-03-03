@@ -11,7 +11,7 @@ appLib.CnvMan.prototype._set = function(id, ref){
 }
 appLib.CnvMan.prototype.get = function(id){
     if( typeof this.refs[id]  == "undefined"){
-         this._set(id, appLib.canvasExtensions(id));
+         this._set(id, appLib.$C(id));
     }
     return this.refs[id];
 }
@@ -23,7 +23,7 @@ appLib.CnvMan.prototype.set = function(id, reference){
     return this.refs[id];
 }
 appLib.CnvMan.prototype.exists = function(id){
-   return ( this.refs[id] instanceof CanvasRenderingContext2D ) || ( this.refs[id] instanceof appLib.ExtendedCanvas)
+   return typeof this.refs[id] != "undefined";
 }
 
 
