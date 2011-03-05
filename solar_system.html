@@ -25,14 +25,28 @@
         </div>
         <script>
         
-        function Planet(origin, radius, size, speed, color){
+        function Planet(origin, radius, size, speed, color, isPlanet){
             this.origin = origin;
             this.radius = radius;
-            this.size  = size;
-            this.speed = speed;
+            this.size  = Math.floor(size);
+            this.speed = Math.max(1, speed);
             this.color = color;
             this.position = Math.random() * 360;
+            
+            if(isPlanet){
+                var child = new Planet(origin, Math.max(size + 4, Math.random() * 12), size * .25, Math.random() * 20, color, false);
+                this.children = [child];    
+            }else{
+                this.children = [];
+            }
+            
+            
         }
+        
+        Planet.prototype.updateOrigin = function(origin){
+            this.origin = origin;
+        }
+        
         
         Planet.prototype.render = function(ctx){
             this.position = this.position + this.speed;
@@ -43,22 +57,29 @@
             ctx.beginPath();
             ctx.fillStyle = "white";
             ctx.strokeStyle = "white";
-            origin = ctx.rayGen(this.radius, this.position, this.origin[0], this.origin[1]);
+            var origin = ctx.rayGen(this.radius, this.position, this.origin[0], this.origin[1]);
             //console.log(origin);
             ctx.arc(origin[0], origin[1], this.size, 0, Math.PI * 2, true);
             ctx.closePath();
             ctx.fill();
+            for(var c = 0; c < this.children.length ; c++){
+                this.children[c].updateOrigin(origin);                
+                this.children[c].render(ctx);
+                $("#specs").append($("<li>").text( " Child size " + this.children[c].size  + " speed " + this.children[c].speed + " radius " + this.children[c].radius) )
+            }
+            
+            
         }
         
         
         function MainLoop(){
             
             this.planets = [];
-            for(var p = 0; p< 9; p++){
+            for(var p = 0; p < 12; p++){
                 var size = Math.random() * 12;
-                var radius = Math.random() * 120 - size;
-                var speed = Math.random() * 20;
-                var planet = new Planet([300,300],radius, size, speed , "white"  );
+                var radius = Math.max( 45, Math.random() * 200 - size) + p * 2;
+                var speed = Math.random() * 6;
+                var planet = new Planet([300,300],radius, size, speed , "white"  , true);
                 this.planets.unshift(planet);
             }
                     
@@ -78,7 +99,7 @@
               for(var i = 0; i< this.planets.length; i++){
                   planet = this.planets[i];
                   planet.render(this.ctx);
-                  $("#specs").append($("<li>").text( " size" + planet.size  + " speed " + planet.speed + " radius " + planet.radius) )
+                  $("#specs").append($("<li>").text( " size " + planet.size  + " speed " + planet.speed + " radius " + planet.radius) )
               }
               
               
