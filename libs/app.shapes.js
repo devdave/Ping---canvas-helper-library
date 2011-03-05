@@ -2,6 +2,8 @@
 
 app.namespace("appLib");
 
+
+
 appLib.Point = function (x, y) {
         this.x = x;
         this.y = y;
@@ -24,6 +26,7 @@ app.w(appLib.Point, function () {
         return (this.y - o.y) / (this.x - o.x);
     };
 });
+
 
 appLib.Line = function (begin, end) {    
         this.begin = begin;

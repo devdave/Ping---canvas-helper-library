@@ -10,12 +10,92 @@
         <script src="./libs/app.canvas.js"></script>
     </head>
     <body>
-        <canvas id="myCan" width="600" height="600" ></canvas>
+    <!--    <fieldset>
+            <legend>Stats</legend>
+            <label>DX</label><input type="Text" id="dx"><br/>
+            <label>DY</label><input type="Text" id="dy"><br/>
+            <label>VX</label><input type="Text" id="vx"><br/>
+            <label>VY</label><input type="Text" id="vy"><br/>
+        </fieldset>-->
+        <div>
+            <canvas style="float:left" id="myCan" width="600" height="600" ></canvas>
+            <ol id="specs" style="float:right">
+                <li>Planet Specs!</li>
+            </ul>
+        </div>
         <script>
+        
+        function Planet(origin, radius, size, speed, color){
+            this.origin = origin;
+            this.radius = radius;
+            this.size  = size;
+            this.speed = speed;
+            this.color = color;
+            this.position = Math.random() * 360;
+        }
+        
+        Planet.prototype.render = function(ctx){
+            this.position = this.position + this.speed;
+            if(this.position > 360){
+                this.position = 0;
+            }
+            
+            ctx.beginPath();
+            ctx.fillStyle = "white";
+            ctx.strokeStyle = "white";
+            origin = ctx.rayGen(this.radius, this.position, this.origin[0], this.origin[1]);
+            //console.log(origin);
+            ctx.arc(origin[0], origin[1], this.size, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        
+        function MainLoop(){
+            
+            this.planets = [];
+            for(var p = 0; p< 9; p++){
+                var size = Math.random() * 12;
+                var radius = Math.random() * 120 - size;
+                var speed = Math.random() * 20;
+                var planet = new Planet([300,300],radius, size, speed , "white"  );
+                this.planets.unshift(planet);
+            }
+                    
+            /**
+             *@property {CanvasRenderingContext2D} ctx The canvas interface
+             */
+            this.ctx = appLib.$C("myCan");
+            this.ctx.strokeStyle = "black";
+        }
+        MainLoop.prototype.tick = function(){
+              
+              
+              this.ctx.floodFill("black");
+              this.ctx.fillStyle = "white";
+              this.ctx.strokeStyle = "white";
+              $("#specs").empty();
+              for(var i = 0; i< this.planets.length; i++){
+                  planet = this.planets[i];
+                  planet.render(this.ctx);
+                  $("#specs").append($("<li>").text( " size" + planet.size  + " speed " + planet.speed + " radius " + planet.radius) )
+              }
+              
+              
+            };
+                            
+        game = new MainLoop();
+        
+        function interval(){
+            game.tick();
+        }
+        
         $(function(){
-                var ctx = appLib.$C("myCan");
-                //ctx.c.strokeStyle = "black";
-                //ctx.c.circle(150, 150, 40);                 
+                
+                //ctx.c.circle(150, 150, 40);
+                intHandle = setInterval(interval, 50);
+                
+                
         });
         </script>
     </body>

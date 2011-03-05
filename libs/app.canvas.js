@@ -86,10 +86,16 @@ CanvasRenderingContext2D.prototype.drawCircle = function(x, y, radius){
                                                 });
 }
 
-CanvasRenderingContext2D.prototype.pixel = function(x,y){
+CanvasRenderingContext2D.prototype.putPixel = function(x,y){
                         return this.render(function(){
-                        this.ctx.moveTo(x,y);
-                        this.ctx.arc(x,y, 1 )                                                
+                        this.moveTo(x,y);
+                        this.fillRect(x,y,1,1);                        
                         });
     }
 
+CanvasRenderingContext2D.prototype.floodFill = function(color){
+                        return this.render(function(){
+                           this.fillStyle  = color;                 
+                           this.fillRect(0,0, this.canvas.clientWidth, this.canvas.clientHeight);                     
+                        });
+}
