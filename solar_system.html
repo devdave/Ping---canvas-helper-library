@@ -33,11 +33,18 @@
             this.color = color;
             this.position = Math.random() * 360;
             
-            if(isPlanet){
-                var child = new Planet(origin, Math.max(size + 4, Math.random() * 12), size * .25, Math.random() * 20, color, false);
-                this.children = [child];    
-            }else{
-                this.children = [];
+            this.children = [];
+            
+            if(size > 10){
+                var cCount = Math.floor(Math.random() * 4);
+                for(var i = 0; i < cCount; i++ ){
+                    var childRadius = Math.max( radius + 1,  Math.random() * 12  );
+                    var childSize   = Math.max(1, size * .5);
+                    var childSpeed  = Math.random() * 18;
+                    var child = new Planet(origin, childRadius, childSize , childSpeed, color, false);
+                    this.children.unshift(child);
+                }
+
             }
             
             
@@ -75,8 +82,8 @@
         function MainLoop(){
             
             this.planets = [];
-            for(var p = 0; p < 12; p++){
-                var size = Math.random() * 12;
+            for(var p = 0; p < 6; p++){
+                var size = Math.random() * 18;
                 var radius = Math.max( 45, Math.random() * 200 - size) + p * 2;
                 var speed = Math.random() * 6;
                 var planet = new Planet([300,300],radius, size, speed , "white"  , true);
