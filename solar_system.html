@@ -8,123 +8,15 @@
         <script src="./libs/app.shapes.js"></script>
         <script src="./libs/app.input.js"></script>
         <script src="./libs/app.canvas.js"></script>
+        
     </head>
     <body>
-    <!--    <fieldset>
-            <legend>Stats</legend>
-            <label>DX</label><input type="Text" id="dx"><br/>
-            <label>DY</label><input type="Text" id="dy"><br/>
-            <label>VX</label><input type="Text" id="vx"><br/>
-            <label>VY</label><input type="Text" id="vy"><br/>
-        </fieldset>-->
         <div>
-            <canvas style="float:left" id="myCan" width="600" height="600" ></canvas>
+            <canvas style="float:left" id="myCan" width="800" height="600" ></canvas>
             <ol id="specs" style="float:right">
                 <li>Planet Specs!</li>
             </ul>
         </div>
-        <script>
-        
-        function Planet(origin, radius, size, speed, color, isPlanet){
-            this.origin = origin;
-            this.radius = radius;
-            this.size  = Math.floor(size);
-            this.speed = Math.max(1, speed);
-            this.color = color;
-            this.position = Math.random() * 360;
-            
-            this.children = [];
-            
-            if(size > 10){
-                var cCount = Math.floor(Math.random() * 4);
-                for(var i = 0; i < cCount; i++ ){
-                    var childRadius = Math.max( radius + 1,  Math.random() * 12  );
-                    var childSize   = Math.max(1, size * .5);
-                    var childSpeed  = Math.random() * 18;
-                    var child = new Planet(origin, childRadius, childSize , childSpeed, color, false);
-                    this.children.unshift(child);
-                }
-
-            }
-            
-            
-        }
-        
-        Planet.prototype.updateOrigin = function(origin){
-            this.origin = origin;
-        }
-        
-        
-        Planet.prototype.render = function(ctx){
-            this.position = this.position + this.speed;
-            if(this.position > 360){
-                this.position = 0;
-            }
-            
-            ctx.beginPath();
-            ctx.fillStyle = "white";
-            ctx.strokeStyle = "white";
-            var origin = ctx.rayGen(this.radius, this.position, this.origin[0], this.origin[1]);
-            //console.log(origin);
-            ctx.arc(origin[0], origin[1], this.size, 0, Math.PI * 2, true);
-            ctx.closePath();
-            ctx.fill();
-            for(var c = 0; c < this.children.length ; c++){
-                this.children[c].updateOrigin(origin);                
-                this.children[c].render(ctx);
-                $("#specs").append($("<li>").text( " Child size " + this.children[c].size  + " speed " + this.children[c].speed + " radius " + this.children[c].radius) )
-            }
-            
-            
-        }
-        
-        
-        function MainLoop(){
-            
-            this.planets = [];
-            for(var p = 0; p < 6; p++){
-                var size = Math.random() * 18;
-                var radius = Math.max( 45, Math.random() * 200 - size) + p * 2;
-                var speed = Math.random() * 6;
-                var planet = new Planet([300,300],radius, size, speed , "white"  , true);
-                this.planets.unshift(planet);
-            }
-                    
-            /**
-             *@property {CanvasRenderingContext2D} ctx The canvas interface
-             */
-            this.ctx = appLib.$C("myCan");
-            this.ctx.strokeStyle = "black";
-        }
-        MainLoop.prototype.tick = function(){
-              
-              
-              this.ctx.floodFill("black");
-              this.ctx.fillStyle = "white";
-              this.ctx.strokeStyle = "white";
-              $("#specs").empty();
-              for(var i = 0; i< this.planets.length; i++){
-                  planet = this.planets[i];
-                  planet.render(this.ctx);
-                  $("#specs").append($("<li>").text( " size " + planet.size  + " speed " + planet.speed + " radius " + planet.radius) )
-              }
-              
-              
-            };
-                            
-        game = new MainLoop();
-        
-        function interval(){
-            game.tick();
-        }
-        
-        $(function(){
-                
-                //ctx.c.circle(150, 150, 40);
-                intHandle = setInterval(interval, 50);
-                
-                
-        });
-        </script>
+        <script src="./solar.js"></script>
     </body>
 </html>

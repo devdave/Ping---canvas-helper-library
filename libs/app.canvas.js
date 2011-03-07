@@ -47,6 +47,7 @@ CanvasRenderingContext2D.prototype.render = function(block){
                         //@TODO add try/catch here?
                         block.call(this);
                         this.closePath();
+                        
 }
 
 
@@ -61,12 +62,19 @@ CanvasRenderingContext2D.prototype.drawLine = function(p1, p2){
     /**
      *Given a Radi & angel value, return points on a circle
      */
-CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, x, y){
+//CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, x, y){
+//                        var radian = angle * Math.PI/180;
+//                        var lx = Radius * (Math.cos(radian)) + x;
+//                        var ly = Radius * (Math.sin(radian)) + y;
+//                        return [lx, ly];
+//                };
+                
+CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, originX, originY, ratio ){
                         var radian = angle * Math.PI/180;
-                        var lx = Radius * (Math.cos(radian)) + x;
-                        var ly = Radius * (Math.sin(radian)) + y;
+                        var lx = (Radius * (Math.cos(radian)* 1.8) + originX) ;
+                        var ly = Radius * (Math.sin(radian)) + originY;
                         return [lx, ly];
-                };
+};
 
 CanvasRenderingContext2D.prototype.line = function(p1, p2){
             
@@ -80,17 +88,26 @@ CanvasRenderingContext2D.prototype.line = function(p1, p2){
 CanvasRenderingContext2D.prototype.circle = function(x, y, radius) {
                         return this.arc(x, y, radius, 0, Math.PI* 2, true);
                         };
+                        
 CanvasRenderingContext2D.prototype.drawCircle = function(x, y, radius){
                         return this.render(function(){
                                                 this.circle(x,y,radius);
                                                 });
 }
 
-CanvasRenderingContext2D.prototype.putPixel = function(x,y){
+CanvasRenderingContext2D.prototype.putPixel = function(x,y, color){
+                        if(arguments.length == 1){
+                          var origin = x;
+                        }else{
+                          var origin = [x,y];
+                        }
+                        color = color || "white";
                         return this.render(function(){
-                        this.moveTo(x,y);
-                        this.fillRect(x,y,1,1);                        
+                        this.moveTo(origin[0],origin[1]);
+                        this.fillStyle = color;
+                        this.fillRect(origin[0],origin[1],1,1);                        
                         });
+                        this.fill();
     }
 
 CanvasRenderingContext2D.prototype.floodFill = function(color){
