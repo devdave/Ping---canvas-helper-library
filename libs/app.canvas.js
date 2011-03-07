@@ -62,16 +62,17 @@ CanvasRenderingContext2D.prototype.drawLine = function(p1, p2){
     /**
      *Given a Radi & angel value, return points on a circle
      */
-//CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, x, y){
-//                        var radian = angle * Math.PI/180;
-//                        var lx = Radius * (Math.cos(radian)) + x;
-//                        var ly = Radius * (Math.sin(radian)) + y;
-//                        return [lx, ly];
-//                };
+CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, x, y){
+                       var radian = angle * Math.PI/180;
+                        var lx = Radius * (Math.cos(radian)) + x;
+                        var ly = Radius * (Math.sin(radian)) + y;
+                        return [lx, ly];
+                };
                 
-CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, originX, originY, ratio ){
+CanvasRenderingContext2D.prototype.elipGen = function(Radius, angle, originX, originY, ratio ){
+                        ratio = ratio || 1.8
                         var radian = angle * Math.PI/180;
-                        var lx = (Radius * (Math.cos(radian)* 1.8) + originX) ;
+                        var lx = (Radius * (Math.cos(radian)* ratio) + originX) ;
                         var ly = Radius * (Math.sin(radian)) + originY;
                         return [lx, ly];
 };
@@ -94,19 +95,19 @@ CanvasRenderingContext2D.prototype.drawCircle = function(x, y, radius){
                                                 this.circle(x,y,radius);
                                                 });
 }
-
+CanvasRenderingContext2D.prototype.pixel    = function(point, color){
+                        this.moveTo(point[0],point[1]);
+                        this.fillStyle = color;
+                        this.fillRect(point[0],point[1],1,1); 
+}
 CanvasRenderingContext2D.prototype.putPixel = function(x,y, color){
                         if(arguments.length == 1){
-                          var origin = x;
+                          var point = x;
                         }else{
-                          var origin = [x,y];
+                          var point = [x,y];
                         }
                         color = color || "white";
-                        return this.render(function(){
-                        this.moveTo(origin[0],origin[1]);
-                        this.fillStyle = color;
-                        this.fillRect(origin[0],origin[1],1,1);                        
-                        });
+                        return this.render(this.pixel(point, color));
                         this.fill();
     }
 

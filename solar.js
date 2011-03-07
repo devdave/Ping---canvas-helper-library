@@ -5,15 +5,16 @@
             this.speed = Math.round( Math.max(1, speed) * 100 ) / 100;
             this.color = color;
             this.position = Math.random() * 360;
+            this.isPlanet = isPlanet || false;
             
             this.children = [];
             
-            if(size > 10){
-                var cCount = Math.floor(Math.random() * 0);
+            if(isPlanet){
+                var cCount = Math.floor(Math.random() * 2);
                 for(var i = 0; i < cCount; i++ ){
-                    var childRadius = Math.max( radius + 1,  Math.random() * 12  );
+                    var childRadius = Math.max( Math.random() * 15,  Math.random() * 12  );
                     var childSize   = Math.max(1, size * .5);
-                    var childSpeed  = Math.random() * 18;
+                    var childSpeed  = Math.random() * 4;
                     var child = new Planet(origin, childRadius, childSize , childSpeed, color, false);
                     this.children.unshift(child);
                 }
@@ -24,12 +25,23 @@
         }
         
         Planet.prototype.drawOrbit = function(ctx){
-            for(var i = 0; i < 360; i++){
-                var origin = ctx.rayGen(this.radius, i, this.origin[0], this.origin[1]);
-                ctx.putPixel(origin[0],origin[1],"blue");
-                //ctx.arc(origin[0], origin[1], 1, 0, Math.PI * 2, true);
+            var i = 0;
+            var method = (this.isPlanet || true) ? ctx.elipGen : ctx.rayGen;
+            var startOrigin = method.call(ctx, this.radius, 0, this.origin[0], this.origin[1] );
+            var origin = method.call(ctx, this.radius, i+2, this.origin[0], this.origin[1] );
+            
+            
+            ctx.strokeStyle = "blue";
+            ctx.beginPath();
+            for(var i = 1; i < 360; i++){
+                
+                ctx.moveTo(startOrigin[0], startOrigin[1]);
+                ctx.lineTo(origin[0], origin[1]);
+                var startOrigin = method.call(ctx, this.radius, i, this.origin[0], this.origin[1] );
+                var origin = method.call(ctx, this.radius, i+2, this.origin[0], this.origin[1] );
             }
-            ctx.fill();
+            ctx.closePath();
+            ctx.stroke();
         }
         
         Planet.prototype.updateOrigin = function(origin){
@@ -43,12 +55,14 @@
                 this.position = 0;
             }
             this.drawOrbit(ctx);
-            var origin = ctx.rayGen(this.radius, this.position, this.origin[0], this.origin[1]);
+            var method = (this.isPlanet || true) ? ctx.elipGen : ctx.rayGen;              
+
+            var origin = method.call(ctx, this.radius, this.position, this.origin[0], this.origin[1]);
+            
             ctx.fillStyle = "white";
             ctx.strokeStyle = "white";
             var mySize = this.size;
             ctx.render(function(){                    
-                     //console.log(origin);
                     this.arc(origin[0], origin[1], mySize, 0, Math.PI * 2, true);
             });
             ctx.fill();
@@ -91,8 +105,8 @@
             for(var p = 0; p < planets.length; p++){
                 var size = planets[p][0];
                 var radius =  planets[p][1];
-                var speed = Math.random() * 6;
-                var planet = new Planet([400,300],radius, size, speed , "white"  , true);
+                var speed =  100 / radius;//  Math.random() * ;
+                var planet = new Planet([400,300],radius, size, speed , "white"  , p != 0);
                 this.planets.unshift(planet);
             }
         }
@@ -106,7 +120,7 @@
               for(var i = 0; i< this.planets.length; i++){
                   planet = this.planets[i];
                   planet.render(this.ctx);
-                  $("#specs").append($("<li>").text( " size " + planet.size  + " speed " + planet.speed + " radius " + planet.radius) )
+                  $("#specs").append($("<li>").text( " size " + planet.size  + " \nspeed " + planet.speed + " \nradius " + planet.radius) )
               }
               
               
