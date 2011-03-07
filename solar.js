@@ -6,7 +6,7 @@
             this.color = color;
             this.position = Math.random() * 360;
             this.isPlanet = isPlanet || false;
-            
+            this.ratio = Math.min(1.5 , Math.random() * 2.2);
             this.children = [];
             
             if(isPlanet){
@@ -37,8 +37,8 @@
                 
                 ctx.moveTo(startOrigin[0], startOrigin[1]);
                 ctx.lineTo(origin[0], origin[1]);
-                var startOrigin = method.call(ctx, this.radius, i, this.origin[0], this.origin[1] );
-                var origin = method.call(ctx, this.radius, i+2, this.origin[0], this.origin[1] );
+                var startOrigin = method.call(ctx, this.radius, i, this.origin[0], this.origin[1], this.ratio);
+                var origin = method.call(ctx, this.radius, i+2, this.origin[0], this.origin[1] , this.ratio);
             }
             ctx.closePath();
             ctx.stroke();
@@ -57,7 +57,7 @@
             this.drawOrbit(ctx);
             var method = (this.isPlanet || true) ? ctx.elipGen : ctx.rayGen;              
 
-            var origin = method.call(ctx, this.radius, this.position, this.origin[0], this.origin[1]);
+            var origin = method.call(ctx, this.radius, this.position, this.origin[0], this.origin[1], this.ratio);
             
             ctx.fillStyle = "white";
             ctx.strokeStyle = "white";
