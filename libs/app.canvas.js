@@ -70,7 +70,7 @@ CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, x, y){
                 };
                 
 CanvasRenderingContext2D.prototype.elipGen = function(Radius, angle, originX, originY, ratio ){
-                        ratio = ratio || 1.8
+                        ratio = ratio || Math.random() * 3;
                         var radian = angle * Math.PI/180;
                         var lx = (Radius * (Math.cos(radian)* ratio) + originX) ;
                         var ly = Radius * (Math.sin(radian)) + originY;
