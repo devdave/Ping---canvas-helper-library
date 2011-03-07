@@ -31,7 +31,7 @@
             var origin = method.call(ctx, this.radius, i+2, this.origin[0], this.origin[1] );
             
             
-            ctx.strokeStyle = "blue";
+            ctx.strokeStyle = "darkred";
             ctx.beginPath();
             for(var i = 1; i < 360; i++){
                 
@@ -50,15 +50,20 @@
         
         
         Planet.prototype.render = function(ctx){
-            this.position = this.position + this.speed;
-            if(this.position > 360){
-                this.position = 0;
-            }
-            this.drawOrbit(ctx);
-            var method = (this.isPlanet || true) ? ctx.elipGen : ctx.rayGen;              
+                    
+                    this.position = this.position + this.speed;
+                    if(this.position > 360){
+                        this.position = 0;
+                    }
+                    
+                    var method = (this.isPlanet || true) ? ctx.elipGen : ctx.rayGen;              
+                    var origin = method.call(ctx, this.radius, this.position, this.origin[0], this.origin[1], this.ratio);
 
-            var origin = method.call(ctx, this.radius, this.position, this.origin[0], this.origin[1], this.ratio);
             
+                    
+            
+            this.drawOrbit(ctx);
+
             ctx.fillStyle = "white";
             ctx.strokeStyle = "white";
             var mySize = this.size;
@@ -66,25 +71,29 @@
                     this.arc(origin[0], origin[1], mySize, 0, Math.PI * 2, true);
             });
             ctx.fill();
+            
             for(var c = 0; c < this.children.length ; c++){
-                this.children[c].updateOrigin(origin);                
-                this.children[c].render(ctx);
-                $("#specs").append($("<li>").text( " Child size " + this.children[c].size  + " speed " + this.children[c].speed + " radius " + this.children[c].radius) )
-            }
+                        this.children[c].updateOrigin(origin);                
+                        this.children[c].render(ctx);
+                    }
+            
             
             
         }
         
         
-        function MainLoop(){
-            
-            this.genPlanets();
-                    
+        function MainLoop(canvasID, debug){
             /**
              *@property {CanvasRenderingContext2D} ctx The canvas interface
              */
-            this.ctx = appLib.$C("myCan");
+            this.ctx = appLib.$C(canvasID);
             this.ctx.strokeStyle = "black";
+            this.debug = debug || false;
+            
+            this.genPlanets();
+            this.ctx.floodFill("black");
+                    
+            
         }
         MainLoop.prototype.genPlanets = function(){
             this.planets = [];
@@ -101,32 +110,39 @@
             //planets[i++] = [7, 159];
             planets[i++] = [8, 176];
             
-                        
+            //this.starPoint = [this.ctx.canvas.clientHeight /2  ,this.ctx.canvas.clientWidth / 2];
+            this.starPoint = [this.ctx.canvas.clientWidth/2, this.ctx.canvas.clientHeight /2  ];
+
             for(var p = 0; p < planets.length; p++){
                 var size = planets[p][0];
                 var radius =  planets[p][1];
-                var speed =  100 / radius;//  Math.random() * ;
-                var planet = new Planet([400,300],radius, size, speed , "white"  , p != 0);
+                var speed =  p == 0 ? 0 : ( 100 / radius);//  Math.random() * ;
+                var planet = new Planet(this.starPoint , radius, size, speed , "white"  , p != 0);
                 this.planets.unshift(planet);
             }
         }
         MainLoop.prototype.tick = function(){
+
+                    this.ctx.floodFill("black");
               
-              
-              this.ctx.floodFill("black");
               this.ctx.fillStyle = "white";
               this.ctx.strokeStyle = "white";
               $("#specs").empty();
               for(var i = 0; i< this.planets.length; i++){
                   planet = this.planets[i];
                   planet.render(this.ctx);
-                  $("#specs").append($("<li>").text( " size " + planet.size  + " \nspeed " + planet.speed + " \nradius " + planet.radius) )
+                  if(this.debug){
+                    $("#specs").append($("<li>").text( " size " + planet.size  + " \nspeed " + planet.speed + " \nradius " + planet.radius) )
+                    for(var c = 0; c <  planet.children.length; c++){
+                      $("#specs").append($("<li>").text( "Child size " + planet.children[c].size  + " \nspeed " + planet.children[c].speed + " \nradius " + planet.children[c].radius) )
+
+                    }
+                  }
               }
-              
-              
+
             };
                             
-        game = new MainLoop();
+        game = new MainLoop("myCan", true);
         
         function interval(){
             game.tick();
