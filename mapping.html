@@ -2,19 +2,37 @@
 <html>
     <head>
         <title>Mapping/partitioning</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
     </head>
     <body>
-        <canvas height="400" width="600" id="mapper"></canvas>
+        <input type="text" id="wtf" size="120" /><br/>
+        <canvas height="400" width="600" id="mapper"></canvas>        
         <script src="libs/app.core.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
         <script>
             Sid.js(["libs/app.main.js", "libs/app.canvas.js", "/mapping.js"], function(){
                $(function(){
                     ctx = appLib.$C("mapper");
-                    map = new EntityMap(ctx);
+                    map = new EntityMap(ctx, 2);
                     ctx.render(function(){
                         map.render(ctx);                        
                     }).stroke();
+                    
+                    $(ctx.canvas).mousemove(function(evt){
+                        //@TODO add a getMouseCoords helper thingy
+                        ctx.floodFill("white");
+                        var p = [Math.max(0, evt.layerX - evt.currentTarget.offsetLeft), Math.max(0, evt.layerY - evt.currentTarget.offsetTop)];
+                        var qs = map.find(p);
+                        var quad = qs.pop();
+                        ctx.fillStyle = "black";
+                        ctx.render(function(){ this.fillRect(quad.x, quad.y, quad.x + quad.sx, quad.y + quad.sy); });
+                        try{
+                            $("#wtf").val(quad.depth + " [" +quad.x + ", " + quad.y + "] - [" + quad.sx + ", " + quad.sy + "] - [" + p[0] + ", " + p[1] + "] " );                            
+                        }catch(ex){
+                            //PASS
+                        }
+                        map.render(ctx);
+                    });
                  });
             });
         </script>
