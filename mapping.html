@@ -6,14 +6,16 @@
 
     </head>
     <body>
-        <input type="text" id="wtf" size="120" /><br/>
-        <canvas height="400" width="600" id="mapper"></canvas>        
+        
+        <canvas height="400" width="600" id="mapper"></canvas>
+        <ol id="wtf" style="float:right">
+        </ol>
         <script src="libs/app.core.js"></script>
         <script>
             Sid.js(["libs/app.main.js", "libs/app.canvas.js", "/mapping.js"], function(){
                $(function(){
                     ctx = appLib.$C("mapper");
-                    map = new EntityMap(ctx, 2);
+                    map = new EntityMap(ctx, 3);
                     ctx.render(function(){
                         map.render(ctx);                        
                     }).stroke();
@@ -23,11 +25,17 @@
                         ctx.floodFill("white");
                         var p = [Math.max(0, evt.layerX - evt.currentTarget.offsetLeft), Math.max(0, evt.layerY - evt.currentTarget.offsetTop)];
                         var qs = map.find(p);
-                        var quad = qs.pop();
-                        ctx.fillStyle = "black";
-                        ctx.render(function(){ this.fillRect(quad.x, quad.y, quad.x + quad.sx, quad.y + quad.sy); });
+                        
                         try{
-                            $("#wtf").val(quad.depth + " [" +quad.x + ", " + quad.y + "] - [" + quad.sx + ", " + quad.sy + "] - [" + p[0] + ", " + p[1] + "] " );                            
+                            $("#wtf").empty();
+                            for(var cq = 0; cq < qs.length; cq++){
+                                var quad = qs[cq];
+                                ctx.globalAlpha = (8 - quad.depth) / 10;
+                                ctx.fillStyle = "blue";
+                                ctx.render(function(){ this.fillRect(quad.x, quad.y, quad.x + quad.sx, quad.y + quad.sy); });
+                                text = quad.depth + " [" +quad.x + ", " + quad.y + "] - [" + quad.sx + ", " + quad.sy + "] - [" + p[0] + ", " + p[1] + "] "
+                                $("#wtf").append($("<li>").text( quad.name + " " + text ));                                                            
+                            }
                         }catch(ex){
                             //PASS
                         }

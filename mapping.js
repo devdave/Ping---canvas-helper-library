@@ -8,13 +8,14 @@
  *@argument {integer} ly lower right y coordinate
  *@argument {Integer} depth determines how many more quadrants to descend down
  */
-function Quadrant(x, y, sx, sy, depth){  
+function Quadrant(x, y, sx, sy, depth, name){  
     this.x = x;
     this.y = y;
     this.sx = sx;
     this.sy = sy;
-    this.depth = depth;
+    this.depth = depth - 1;
     this.entities = [];
+    this.name = name || "root";
     /* @property {Quadrant} left */
     this.ul = null;
     /* @property {Quadrant} left */
@@ -23,20 +24,16 @@ function Quadrant(x, y, sx, sy, depth){
     this.ur = null;
     /* @property {Quadrant} right */
     this.lr = null;
-    console.group("Quadrant");
-    console.log("", [this.x, this.y], [this.sx, this.sy], this.depth);
-    if(depth > 0){
-        console.log("ll");
-        this.ul = new Quadrant(this.x, this.y, (this.sx/2) + this.x , (this.sy / 2) + this.y , depth - 1);
+    if(this.depth > 0){
+        var halfX = this.sx / 2;
+        var halfY = this.sy / 2;
+        this.ul = new Quadrant(this.x, this.y, halfX , halfY , depth - 1, this.name + " -> ul");
         
-        console.log("ur");
-        this.ur = new Quadrant(this.x + ( this.sx / 2 ), this.y, this.sx, this.sy, depth - 1);
+        this.ur = new Quadrant(this.x + halfX, this.y,  halfX , halfY , depth - 1, this.name + " -> ur");
         
-        console.log("ll");
-        this.ll = new Quadrant(this.x, this.y + ( this.sy / 2 ) , this.sx / 2 ,  this.sy / 2 , depth - 1  );
+        this.ll = new Quadrant(this.x, this.y + halfY , halfX , halfY , depth - 1, this.name + " -> ll" );
 
-        console.log("lr");
-        this.lr = new Quadrant( this.x + ( this.sx / 2 ), this.y + (this.sy / 2), this.sx / 2 ,  this.sy / 2  , depth - 1);
+        this.lr = new Quadrant( this.x + halfX, this.y + halfY, halfX ,  halfY  , depth - 1, this.name + " ->lr");
     }
     console.groupEnd();
 }
