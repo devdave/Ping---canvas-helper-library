@@ -15,7 +15,7 @@
             Sid.js(["libs/app.main.js", "libs/app.canvas.js", "/mapping.js"], function(){
                $(function(){
                     ctx = appLib.$C("mapper");
-                    map = new EntityMap(ctx, 3);
+                    map = new EntityMap(ctx, 6);
                     ctx.render(function(){
                         map.render(ctx);                        
                     }).stroke();
