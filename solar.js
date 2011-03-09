@@ -1,3 +1,6 @@
+  
+  
+  
   function Planet(origin, radius, size, speed, color, isPlanet){
             this.origin = origin;
             this.radius = radius;

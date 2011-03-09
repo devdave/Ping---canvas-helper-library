@@ -47,7 +47,7 @@ CanvasRenderingContext2D.prototype.render = function(block){
                         //@TODO add try/catch here?
                         block.call(this);
                         this.closePath();
-                        
+                        return this;
 }
 
 

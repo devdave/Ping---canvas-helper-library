@@ -54,5 +54,6 @@ app.Exception.prototype.toString = function(){
 
 /**
  *@static Global reference to the Canvas 2d context
+ *@deprecated
  */
 app.CTX = null;

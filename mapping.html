@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mapping/partitioning</title>
+    </head>
+    <body>
+        <canvas height="400" width="600" id="mapper"></canvas>
+        <script src="libs/app.core.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <script>
+            Sid.js(["libs/app.main.js", "libs/app.canvas.js", "/mapping.js"], function(){
+               $(function(){
+                    ctx = appLib.$C("mapper");
+                    map = new EntityMap(ctx);
+                    ctx.render(function(){
+                        map.render(ctx);                        
+                    }).stroke();
+                 });
+            });
+        </script>
+    </body>
+</html>
