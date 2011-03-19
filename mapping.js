@@ -1,4 +1,16 @@
 
+appLib.util = {}
+appLib.util.inside = function(pos, low, high){
+    return (pos > low & pos < high);
+}
+appLib.util.insideBox = function(x,y, box){
+    var eX = box.x || box[0];
+    var eY = box.y || box[1];
+    var sx = box.sx || box[2];
+    var sy = box.sy || box[3];
+    return (( appLib.util.inside(x, eX, eX + sx)) && (appLib.util.inside(y, eY, eY +sy)))    
+}
+
 /**
  *Quadrant is a recursive quad-tree like structure that
  *breaks a given area progressivel into 4 quadrants.
@@ -30,6 +42,62 @@ function Quadrant(x, y, sx, sy, depth, name){
 
 }
 
+Quadrant.prototype.ulAddIf = function(entity){
+    //step 1 does this belong here
+    var box = [this.x, this.y, this.sx/2, this.sy / 2];    
+    if( appLib.util.insideBox(entity.x, entity.y, box) ){
+        if(this.ul == null){
+            this.ul = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ul");         
+        }
+        this.ul.add(entity);
+        return true;
+    }
+    return false;
+}
+
+Quadrant.prototype.urAddIf = function(entity){
+    //step 1 does this belong here
+    var box = [this.x + this.sx/2, this.y, this.sx/2, this.sy / 2];    
+    if( appLib.util.insideBox(entity.x, entity.y, box) ){
+        if(this.ur == null){
+            
+            this.ur = node = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ur");
+        }
+        this.ur.add(entity);
+        return true;
+    }
+    return false;
+    
+}
+
+Quadrant.prototype.llAddIf = function(entity){
+    //step 1 does this belong here
+    var box = [this.x, this.y + this.sy / 2, this.sx/2, this.sy / 2];    
+    if( appLib.util.insideBox(entity.x, entity.y, box) ){
+        if(this.ll == null){
+            
+            this.ll = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ur");
+        }
+        this.ll.add(entity);
+        return true;
+    }
+    return false;
+                
+}
+
+Quadrant.prototype.lrAddIf = function(entity){
+    //step 1 does this belong here
+    var box = [this.x + this.sx/2, this.y + this.sy / 2, this.sx/2, this.sy / 2];    
+    if( appLib.util.insideBox(entity.x, entity.y, box) ){
+        if(this.lr == null){
+            
+            this.lr = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "lr");
+        }
+        this.lr.add(entity);
+        return true;
+    }
+    return false;
+}
 
 /**
  *Does this quadrant contain this point?
@@ -51,42 +119,20 @@ Quadrant.prototype.contains  = function(x, y){
  */
 Quadrant.prototype.add = function(entity){
     
-    //Does this quadrant divided already?
-    if(this.lr || this.ll || this.ul || this.ur){
-        this.loop(function(){
-            if(entity.x > this.x && entity.x < this.x + this.sx){
-                if(entity.y > this.y && entity.y < this.y + this.sy){
-                    this.add(entity);
-                }
-            }
-        });
-    }
+    //Has this quadrant divided already?
+    if(this.entities == null){
+        this.lrAddIf(entity) || this.urAddIf(entity) || this.llAddIf(entity) || this.ulAddIf(entity);        
+    }    
     //Should this quadrant be divided?
-    else if(this.entities.length > 1 && this.depth > 0){
-        //This Quadrant has become crowded, flush out all entities down the next level
-        this.spawn();
+    else if(this.entities.length >= 1 && this.depth > 0 ){
+        //This Quadrant has become crowded, flush out all entities down the next level        
         this.entities.push(entity);
         this.divide();
-        
+        this.entities = null;        
     }else{
         //No, push entity to this Quadrant
         this.entities.push(entity);
     }
-}
-
-/**
- *Spawns child nodes
- *
- */
-Quadrant.prototype.spawn = function(){
-    
-    var sizeX = this.sx / 2;
-    var sizeY = this.sy / 2;
-    
-    this.ul = new Quadrant(this.x,          this.y,         sizeX, sizeY,   this.depth - 1, "ul");     
-    this.ur = new Quadrant(this.x + sizeX,  this.y,         sizeX, sizeY,   this.depth - 1, "ur");
-    this.ll = new Quadrant(this.x,          this.y + sizeY, sizeX, sizeY,   this.depth - 1, "ll");
-    this.lr = new Quadrant(this.x + sizeX,  this.y + sizeY, sizeX, sizeY,   this.depth - 1, "lr");
 }
 
 /**
@@ -96,22 +142,22 @@ Quadrant.prototype.spawn = function(){
 Quadrant.prototype.divide = function(){
     var entity = null;
     while(entity = this.entities.pop()){
-        this.loop(function(){
-            if(entity.x > this.x && entity.x < this.x + this.sx){
-                if(entity.y > this.y && entity.y < this.y + this.sy){
-                    this.add(entity);
-                }
-            }
-        })
+        
+        var failed = this.lrAddIf(entity) || this.urAddIf(entity) || this.llAddIf(entity) || this.ulAddIf(entity)
+        //if(failed == false){
+        //    throw {msg:"Could not place entity"};
+        //}
     }
 }
 
 
 Quadrant.prototype.render = function(ctx, depth){
     ctx.strokeRect(this.x, this.y, this.sx, this.sy);
-    this.loop(function(){
-        this.render(ctx, depth - 1);
-    });
+    if(this.ul) this.ul.render(ctx, depth -1);
+    if(this.ur) this.ur.render(ctx, depth -1);
+    if(this.lr) this.lr.render(ctx, depth -1);
+    if(this.ll) this.ll.render(ctx, depth -1);
+    
 }
 
 Quadrant.prototype.loop = function(block){
@@ -125,17 +171,17 @@ Quadrant.prototype.loop = function(block){
     return retvals;
 }
 
-Quadrant.prototype.find = function(x,y){
-    var targets = [];
-    if(this.contains(x,y)){
-        targets.push(this)
-    }else{
-        return [];
+Quadrant.prototype.find = function(x,y, targets){
+    var myTargets = targets || [];
+    if(this.entities != null && this.contains(x,y)){
+        myTargets.push(this)
     }
-    this.loop(function(){
-        targets = targets.concat(this.find(x,y));
-    });
-    return targets;
+    if(this.ul) this.ul.find(x,y, myTargets);
+    if(this.ur) this.ur.find(x,y, myTargets);
+    if(this.lr) this.lr.find(x,y, myTargets);
+    if(this.ll) this.ll.find(x,y, myTargets);
+
+    return myTargets;
 }
 
 function QuadrantFactory(ctx, max){

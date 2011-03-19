@@ -82,7 +82,6 @@ CanvasRenderingContext2D.prototype.line = function(p1, p2){
                     this.render(function(){
                         this.moveTo(p2.x, p2.y);                        
                         this.lineTo(p1.x, p1.y);                    
-                        this.closePath();
                     });
                 };
     
@@ -91,14 +90,16 @@ CanvasRenderingContext2D.prototype.circle = function(x, y, radius) {
                         };
                         
 CanvasRenderingContext2D.prototype.drawCircle = function(x, y, radius){
-                        return this.render(function(){
-                                                this.circle(x,y,radius);
-                                                });
+                        this.beginPath();
+                        this.circle(x,y,radius);
+                        this.closePath();
 }
 CanvasRenderingContext2D.prototype.pixel    = function(point, color){
+                        this.save();
                         this.moveTo(point[0],point[1]);
                         this.fillStyle = color;
-                        this.fillRect(point[0],point[1],1,1); 
+                        this.fillRect(point[0],point[1],1,1);
+                        this.restore();
 }
 CanvasRenderingContext2D.prototype.putPixel = function(x,y, color){
                         if(arguments.length == 1){
@@ -107,13 +108,18 @@ CanvasRenderingContext2D.prototype.putPixel = function(x,y, color){
                           var point = [x,y];
                         }
                         color = color || "white";
-                        return this.render(this.pixel(point, color));
-                        this.fill();
+                        this.pixel(point, color)
     }
 
 CanvasRenderingContext2D.prototype.floodFill = function(color){
-                        return this.render(function(){
-                           this.fillStyle  = color;                 
-                           this.fillRect(0,0, this.canvas.clientWidth, this.canvas.clientHeight);                     
-                        });
+                        this.save();
+                        this.fillStyle  = color;                 
+                        this.fillRect(0,0, this.canvas.clientWidth, this.canvas.clientHeight);                     
+                        this.restore();
+                        }
+
+CanvasRenderingContext2D.prototype.clearAll = function(color){
+                        this.clearRect(0,0,this.canvas.clientWidth, this.canvas.clientHeight );
+                        }
+
 }
