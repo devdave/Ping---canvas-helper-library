@@ -2,47 +2,130 @@
 <html>
     <head>
         <title>Mapping/partitioning</title>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-
+        <script src="/js/jquery.js"></script>
+        <!--<script type="text/javascript" src="/js/jquery.jstree.js"></script>-->
+        <script src="libs/app.core.js"></script>
+        <script src="libs/app.main.js"></script>
+        <script src="libs/app.canvas.js"></script>
+        <script src="/mapping.js"></script>
     </head>
     <body>
         
         <canvas height="400" width="600" id="mapper"></canvas>
-        <ol id="wtf" style="float:right">
-        </ol>
-        <script src="libs/app.core.js"></script>
+        <div class="statPanel" style="float:right">
+            <ol id="wtf"></ol><br/>
+            <label>Node list</label>
+            <ul id="nodeList"></ul>
+        </div>
         <script>
-            Sid.js(["libs/app.main.js", "libs/app.canvas.js", "/mapping.js"], function(){
-               $(function(){
-                    ctx = appLib.$C("mapper");
-                    map = new EntityMap(ctx, 6);
-                    ctx.render(function(){
-                        map.render(ctx);                        
-                    }).stroke();
+            
+            var run = function(){
+                stepPos = 12;
+                ctx = appLib.$C("mapper");
+                map = QuadrantFactory(ctx, stepPos);
+                
+                function zf( number )
+                {
+                  var width = 3;
+                  width -= number.toString().length;
+                  if ( width > 0 )
+                  {
+                    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+                  }
+                  return number;
+                }
+                
+                function traversal(node, parent){
+                        
+                        if(this instanceof Quadrant){
+                            node = this;
+                        }
+                        
+                        var liNode = "<li>";
+                        liNode += "\n " + node.name
+                                        + " - "
+                                        + node.depth
+                                        + "["
+                                        + zf(node.x)
+                                        + ","
+                                        + zf(node.y)
+                                        + "] "
+                                        + "["
+                                        + zf(node.sx)
+                                        + ","
+                                        + zf(node.sy)
+                                        + "]";
+                        
+                        var temp = node.loop(traversal);
+                        if(temp.length > 0){
+                            var subTemp = temp.join("\n");
+                            
+                            liNode += "<ul>" + subTemp + "</ul>";
+                        }
+                        liNode += "</li>";
+                        return liNode;
+                    }
                     
-                    $(ctx.canvas).mousemove(function(evt){
+                $(ctx.canvas).mousemove(function(evt){
                         //@TODO add a getMouseCoords helper thingy
-                        ctx.floodFill("white");
+                        ctx.globalAlpha = 1;
+                        
                         var p = [Math.max(0, evt.layerX - evt.currentTarget.offsetLeft), Math.max(0, evt.layerY - evt.currentTarget.offsetTop)];
-                        var qs = map.find(p);
+                        var qs = map.find(p[0],p[1]);                     
+                        
+                        var highColor = 200;
                         
                         try{
-                            $("#wtf").empty();
+                            $("#wtf").empty().append($("<legend>").text("[" + p[0] + ", " + p[1] + "]"));
                             for(var cq = 0; cq < qs.length; cq++){
                                 var quad = qs[cq];
-                                ctx.globalAlpha = (8 - quad.depth) / 10;
-                                ctx.fillStyle = "blue";
-                                ctx.render(function(){ this.fillRect(quad.x, quad.y, quad.x + quad.sx, quad.y + quad.sy); });
-                                text = quad.depth + " [" +quad.x + ", " + quad.y + "] - [" + quad.sx + ", " + quad.sy + "] - [" + p[0] + ", " + p[1] + "] "
-                                $("#wtf").append($("<li>").text( quad.name + " " + text ));                                                            
+                                ctx.globalAlpha = (100 - (quad.depth*2)) / 100;
+                                var color = "rgb(128,128," + Math.max(10, highColor - (quad.depth * 10)) + ");";
+                                ctx.fillStyle = color;
+                                ctx.render(function(){
+                                            this.fillRect(quad.x, quad.y, quad.sx, quad.sy);
+                                });
+                                text = quad.name + " " + quad.depth + " [" +quad.x + ", " + quad.y + "] - [" + quad.sx + ", " + quad.sy + "] "
+                                
+                                console.log(color);
+                                $("#wtf").append($("<li>")
+                                                 .text( text ).attr("style", "color:" + color)
+                                                 );                                                       
                             }
                         }catch(ex){
-                            //PASS
+                            console.error(ex);
                         }
+                        ctx.globalAlpha = 1;
                         map.render(ctx);
+                        
+                        
                     });
-                 });
-            });
+                
+                $(ctx.canvas).mousedown(function(evt){
+                    var p = [Math.max(0, evt.layerX - evt.currentTarget.offsetLeft), Math.max(0, evt.layerY - evt.currentTarget.offsetTop)];
+                    //Add a 10x10 block where the mouse clicked
+                    map.add({x:p[0], y:p[1], sx:10, sy:10});
+
+                    ctx.floodFill("white");
+                    ctx.render(function(){
+                        map.render(ctx);                            
+                    });
+                    
+                    
+                    var list = traversal(map);
+                    $("#nodeList").empty();
+                    document.getElementById("nodeList").innerHTML = list;
+
+                });
+                
+                
+               
+               
+               
+            };
+        
+            $(run);
         </script>
+        
     </body>
 </html>
