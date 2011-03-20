@@ -121,5 +121,3 @@ CanvasRenderingContext2D.prototype.floodFill = function(color){
 CanvasRenderingContext2D.prototype.clearAll = function(color){
                         this.clearRect(0,0,this.canvas.clientWidth, this.canvas.clientHeight );
                         }
-
-}

@@ -6,8 +6,10 @@
         <!--<script type="text/javascript" src="/js/jquery.jstree.js"></script>-->
         <script src="libs/app.core.js"></script>
         <script src="libs/app.main.js"></script>
+        <script src="libs/app.shapes.js"></script>
         <script src="libs/app.canvas.js"></script>
         <script src="/mapping.js"></script>
+        <script src="/mapping.util.js"></script>
     </head>
     <body>
         
@@ -22,156 +24,34 @@
             function run(){
                 
                 
-                function zf( number )
-                {
-                  var width = 3;
-                  width -= number.toString().length;
-                  if ( width > 0 )
-                  {
-                    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
-                  }
-                  return number;
-                }
-                
-                function traversal(node, parent){
-                        
-                        if(this instanceof Quadrant){
-                            node = this;
-                        }
-                        
-                        var liNode = "<li>";
-                        liNode += "\n " + node.name
-                                        + " - "
-                                        + node.depth
-                                        + "["
-                                        + zf(node.x)
-                                        + ","
-                                        + zf(node.y)
-                                        + "] "
-                                        + "["
-                                        + zf(node.sx)
-                                        + ","
-                                        + zf(node.sy)
-                                        + "]";
-                        
-                        var temp = node.loop(traversal);
-                        if(temp.length > 0){
-                            var subTemp = temp.join("\n");
-                            
-                            liNode += "<ul>" + subTemp + "</ul>";
-                        }
-                        liNode += "</li>";
-                        return liNode;
-                    }
-                    
-                //$(ctx.canvas).mousemove(function mousemove(evt){
-                //        //@TODO add a getMouseCoords helper thingy
-                //        ctx.globalAlpha = 1;
-                //        
-                //        var p = [Math.max(0, evt.layerX - evt.currentTarget.offsetLeft), Math.max(0, evt.layerY - evt.currentTarget.offsetTop)];
-                //        var qs = map.find(p[0],p[1]);                     
-                //        
-                //        var highColor = 200;
-                //        
-                //        try{
-                //            $("#wtf").empty().append($("<legend>").text("[" + p[0] + ", " + p[1] + "]"));
-                //            for(var cq = 0; cq < qs.length; cq++){
-                //                var quad = qs[cq];
-                //                ctx.globalAlpha = (100 - (quad.depth*2)) / 100;
-                //                var color = "rgb(128,128," + Math.max(10, highColor - (quad.depth * 10)) + ");";
-                //                ctx.fillStyle = color;
-                //                ctx.render(function(){
-                //                            this.fillRect(quad.x, quad.y, quad.sx, quad.sy);
-                //                });
-                //                text = quad.name + " " + quad.depth + " [" +quad.x + ", " + quad.y + "] - [" + quad.sx + ", " + quad.sy + "] "
-                //                                                
-                //                $("#wtf").append($("<li>")
-                //                                 .text( text ).attr("style", "color:" + color)
-                //                                 );                                                       
-                //            }
-                //        }catch(ex){
-                //            console.error(ex);
-                //        }
-                //        ctx.globalAlpha = 1;
-                //        map.render(ctx);
-                //        
-                //        
-                //    });
-                
-                function placePoint(p){
-                    map.add({x:Math.round(p[0]), y:Math.round(p[1]), sx:10, sy:10});
-
-   
-                }
-                
-                //$(ctx.canvas).mousedown(function mousedown(evt){
-                //    var p = [Math.max(0, evt.layerX - evt.currentTarget.offsetLeft), Math.max(0, evt.layerY - evt.currentTarget.offsetTop)];
-                //    placePoint(p);                    
-                //});
-                
-                function ballFactory(maxX, maxY){
-                    return {
-                    x: Math.random()*maxX
-                    ,y:Math.random()*maxY
-                    ,dx:Math.random()*5 + 1
-                    ,dy:Math.random()*5 + 1
-                    };
-                }
-                
-                    /**
-                     *Unfortunately this closure is a performance bottleneck
-                     *but not sure how to work around it
-                     */
-                function RunBall(ball, map){
-                        
-                    ball.x += ball.dx;
-                    ball.y += ball.dy;
-                    
-                    if(! appLib.util.inside(ball.x, 0, 600)){
-                        ball.dx = -1 * ball.dx;
-                    }
-                    if(! appLib.util.inside(ball.y, 0, 400)){
-                        ball.dy = -1 * ball.dy;
-                    }
-                    map.add({x:Math.round(ball.x), y:Math.round(ball.y), sx:10, sy:10});
-                    return ball;
-                            //placePoint([ball.x,ball.y]);                        
-                }
-                function RenderBall(ball, map, ctx){
-                            qs = map.find(ball.x, ball.y);
-                            for(var i = qs.length; i > 0; i++){
-                               var debugHere = 1; 
-                            }
-                            ctx.fillRect(ball.x,ball.y,10,10);                            
-                        }
-                    };
                 var balls = [];
-                for(var bMax = 0; bMax < 10; bMax++){
+                for(var bMax = 0; bMax < 6; bMax++){
                     balls.push(ballFactory(600,400));                 
                 }
                 
-                stepPos = 12;
+                var stepPos = 3;
                 ctx = appLib.$C("mapper");
                 map = QuadrantFactory(ctx, stepPos);
                 
                 function runLogic(){
-                    stepPos = 12;
+                    var highX = 0, highY = 0;
                     ctx = appLib.$C("mapper");
                     delete map;
                     map = QuadrantFactory(ctx, stepPos);
                     for(var i = 0; i < balls.length; i++){
                         balls[i] = RunBall(balls[i], map);
+                        highX = Math.max(highX, Math.abs(balls[i].dx));
+                        highY = Math.max(highY, Math.abs(balls[i].dy));
                     }
-                    ctx.beginPath();                    
-                    ctx.floodFill("white");
+                    ctx.beginPath();
+                    ctx.clearAll();
                     for(var i = 0; i < balls.length; i++){
                         balls[i] = RenderBall(balls[i], map, ctx)
                     }
                     map.render(ctx);
                     ctx.closePath();                    
                 }
-                confirm("Ready to run?");
-               setInterval(runLogic, 25);
+                setInterval(runLogic, 25);
                
                
             };

@@ -121,10 +121,11 @@ Quadrant.prototype.add = function(entity){
     
     //Has this quadrant divided already?
     if(this.entities == null){
-        this.lrAddIf(entity) || this.urAddIf(entity) || this.llAddIf(entity) || this.ulAddIf(entity);        
+        this.lrAddIf(entity) || this.urAddIf(entity) || this.llAddIf(entity) || this.ulAddIf(entity);
+        return;
     }    
     //Should this quadrant be divided?
-    else if(this.entities.length >= 1 && this.depth > 0 ){
+    if(this.entities.length >= 1 && this.depth > 1 ){
         //This Quadrant has become crowded, flush out all entities down the next level        
         this.entities.push(entity);
         this.divide();
@@ -171,16 +172,29 @@ Quadrant.prototype.loop = function(block){
     return retvals;
 }
 
-Quadrant.prototype.find = function(x,y, targets){
-    var myTargets = targets || [];
-    if(this.entities != null && this.contains(x,y)){
-        myTargets.push(this)
-    }
-    if(this.ul) this.ul.find(x,y, myTargets);
-    if(this.ur) this.ur.find(x,y, myTargets);
-    if(this.lr) this.lr.find(x,y, myTargets);
-    if(this.ll) this.ll.find(x,y, myTargets);
+/**
+ *Find all Quadrants from root to bottom tier that lead to
+ *an entity
+ *
+ *@param {Integer} x
+ *@param {Integer} y
+ *@param {Array} myTargets
+ *@returns {Array} returns all quadrants from top to bottom that contain an entity
+ */
+Quadrant.prototype.find = function(x,y){
+    var myTargets = [];
 
+    if(this.contains(x,y)){
+        myTargets.push(this);
+        if(this.entities == null){
+            var temp = [];
+            if(this.ul)     temp = temp.concat( this.ul.find(x,y, myTargets));
+            if(this.ur )    temp = temp.concat( this.ur.find(x,y, myTargets));
+            if(this.lr )    temp = temp.concat( this.lr.find(x,y, myTargets));
+            if(this.ll )    temp = temp.concat( this.ll.find(x,y, myTargets));
+            return myTargets.concat(temp);
+        }
+    }
     return myTargets;
 }
 

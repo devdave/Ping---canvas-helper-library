@@ -2,7 +2,11 @@
 
 app.namespace("appLib");
 
-
+appLib.pointDistance = function(x1,y1,x2,y2){
+        var tX = Math.pow(x1 - x2, 2);
+        var tY = Math.pow(y1 - y2, 2);
+        return Math.sqrt((tX) + (tY));
+}
 
 appLib.Point = function (x, y) {
         this.x = x;
@@ -13,9 +17,7 @@ app.w(appLib.Point, function () {
     
 
     this.dist = function (o) {
-        var tX = Math.pow(this.x - o.x, 2);
-        var tY = Math.pow(this.y - o.y, 2);
-        return Math.sqrt((tX) + (tY));
+        return appLib.pointDistance(this.x,o.x,this.y,o.y);
     };
 
 
