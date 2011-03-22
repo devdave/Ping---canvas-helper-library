@@ -1,4 +1,5 @@
-appLib.MainLoop = function(){                
+ping.ns("ping.Lib");
+ping.Lib.MainLoop = function(){                
                 var self = this;
                 var tickTime = 10; //How many times to rerun through the game loop in MS
                 

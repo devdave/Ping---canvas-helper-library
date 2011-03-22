@@ -1,28 +1,28 @@
 
-app.namespace("appLib");
+ping.namespace("ping.Lib");
 
-appLib.CnvMan = function(){
+ping.Lib.CnvMan = function(){
      this.refs = {};
      this.count = 0;
 }
-appLib.CnvMan.prototype._set = function(id, ref){
+ping.Lib.CnvMan.prototype._set = function(id, ref){
    this.refs[id] = ref;
    this.count += 1;
 }
-appLib.CnvMan.prototype.get = function(id){
+ping.Lib.CnvMan.prototype.get = function(id){
     if( typeof this.refs[id]  == "undefined"){
-         this._set(id, appLib.$C(id));
+         this._set(id, ping.Lib.$C(id));
     }
     return this.refs[id];
 }
 
-appLib.CnvMan.prototype.set = function(id, reference){
+ping.Lib.CnvMan.prototype.set = function(id, reference){
     if( typeof this.refs[id] == "undefined"){
          this._set(id, reference);
     }
     return this.refs[id];
 }
-appLib.CnvMan.prototype.exists = function(id){
+ping.Lib.CnvMan.prototype.exists = function(id){
    return typeof this.refs[id] != "undefined";
 }
 
@@ -30,16 +30,16 @@ appLib.CnvMan.prototype.exists = function(id){
 /**
  *Keeps a record of every extended canvas made
  */
-app.cMngr = new appLib.CnvMan();
+ping.cMngr = new ping.Lib.CnvMan();
 
 
-appLib.$C = function(elemId){
-   if(app.cMngr.exists(elemId)){
-       return app.cMngr.get(elemId);
+ping.$C = function(elemId){
+   if(ping.cMngr.exists(elemId)){
+       return ping.cMngr.get(elemId);
    }
    var element = document.getElementById(elemId);
    var ref = element.getContext("2d");
-   return app.cMngr.set(elemId, ref);
+   return ping.cMngr.set(elemId, ref);
 }
 
 CanvasRenderingContext2D.prototype.render = function(block){
@@ -121,3 +121,6 @@ CanvasRenderingContext2D.prototype.floodFill = function(color){
 CanvasRenderingContext2D.prototype.clearAll = function(color){
                         this.clearRect(0,0,this.canvas.clientWidth, this.canvas.clientHeight );
                         }
+
+//To allow for documentation detection
+ping.Lib.CanvasRenderingContext2D = CanvasRenderingContext2D;

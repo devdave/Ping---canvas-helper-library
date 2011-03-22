@@ -35,10 +35,10 @@
             ball.dy = ball.dy > 0 ? 1 : -1;
         }
         
-        if(! appLib.util.inside(ball.x, 0, 600)){
+        if(! ping.Lib.util.inside(ball.x, 0, 600)){
             ball.dx *= -1;
         }
-        if(! appLib.util.inside(ball.y, 0, 400)){
+        if(! ping.Lib.util.inside(ball.y, 0, 400)){
             ball.dy *= -1;
         }
         map.add(ball);
@@ -54,7 +54,7 @@
                 for(var e = 0; e < quad.entities.length; e++ ){
                     entity = quad.entities[e];
                     if(entity.id != ball.id){
-                        dist = appLib.pointDistance(ball.x, ball.y, entity.x, entity.y);
+                        dist = ping.Lib.pointDistance(ball.x, ball.y, entity.x, entity.y);
                         if(dist < 250){
                             ctx.save();
                             ctx.beginPath();

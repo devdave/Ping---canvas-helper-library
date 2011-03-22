@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script src="libs/ping.main.js"></script>
+        <script src="libs/ping.intersection.js"></script>
+        <script src="libs/ping.canvas.js"></script>
+        <script src="js/jquery.js"></script>
+    </head>
+    <body>
+        <script>
+            $(function(){
+               function prettyThing(parent, name){
+                    var buf = "<ul>\n  <legend>"+name+"</legend>\n";
+                    for(var childName in parent[name]){
+                        var childVal  = parent[name][childName];
+                        var childType = typeof childVal;
+                        
+                        
+                        switch(childType){
+                            case "string":
+                            case "number":
+                            case "boolean":
+                            case "undefined":
+                            case "function":
+                                buf += "<li><span class='name'>" + childName + "</span>\n<br/>";
+                                buf += "<span class='type'> "+childType+" </span>\n<br/>";
+                                buf += "<span class='content'> "+ childVal +" </span>\n<br/>";
+                                buf += "</li>";
+                                buf += "\n";
+                            break;
+                            case "object":
+                                if(childVal == null){
+                                    buf += "<li><span class='name'>" + childName +"</span>\n<br/>";
+                                    buf += "<span class='type'>"+childType+"</span>\n<br/>";
+                                    buf += "<span class='content'> "+ childVal +" </span><br/>\n";
+                                    buf += "</li>";
+                                buf += "\n";
+
+                                }
+                                else if (typeof childVal.length === 'number' &&
+                                          !(childVal.propertyIsEnumerable('length')) &&
+                                          typeof childVal.splice === 'function') {
+                                    buf += "<li><span class='name'> " + childName +" </span><br/>\n";
+                                    buf += "<span class='type'> Array </span><br/>\n";
+                                    buf += "<span class='content'> "+ childVal +" </span><br/>\n";
+                                    buf += "</li>";
+                                buf += "\n";
+
+                                }//This is an object
+                                else{
+                                   buf += "<li><span class='name'> " + childName +" </span><br/>\n";
+                                   buf += "<span class='type'> Array </span><br/>";
+                                   buf += "<span class='content'> "+ childVal +" </span><br/>\n";
+                                   buf += "</li>"; 
+                                buf += "\n";
+
+                                }
+                                break;
+                            default:
+                                console.log(childName, childType, childVal);
+                        }//switch
+                        
+                    }//for in
+                    return buf + "</ul>"
+               }//end prettyThing
+               $("#myDiv").html( prettyThing(window, 'ping'));
+            });
+
+        </script>
+        <div id="myDiv"></div>
+
+    </body>
+</html>

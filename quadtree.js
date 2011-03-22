@@ -1,14 +1,14 @@
 
-appLib.util = {}
-appLib.util.inside = function(pos, low, high){
+ping.Lib.util = {}
+ping.Lib.util.inside = function(pos, low, high){
     return (pos > low & pos < high);
 }
-appLib.util.insideBox = function(x,y, box){
+ping.Lib.util.insideBox = function(x,y, box){
     var eX = box.x || box[0];
     var eY = box.y || box[1];
     var sx = box.sx || box[2];
     var sy = box.sy || box[3];
-    return (( appLib.util.inside(x, eX, eX + sx)) && (appLib.util.inside(y, eY, eY +sy)))    
+    return (( ping.Lib.util.inside(x, eX, eX + sx)) && (ping.Lib.util.inside(y, eY, eY +sy)))    
 }
 
 /**
@@ -45,7 +45,7 @@ function Quadrant(x, y, sx, sy, depth, name){
 Quadrant.prototype.ulAddIf = function(entity){
     //step 1 does this belong here
     var box = [this.x, this.y, this.sx/2, this.sy / 2];    
-    if( appLib.util.insideBox(entity.x, entity.y, box) ){
+    if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ul == null){
             this.ul = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ul");         
         }
@@ -58,7 +58,7 @@ Quadrant.prototype.ulAddIf = function(entity){
 Quadrant.prototype.urAddIf = function(entity){
     //step 1 does this belong here
     var box = [this.x + this.sx/2, this.y, this.sx/2, this.sy / 2];    
-    if( appLib.util.insideBox(entity.x, entity.y, box) ){
+    if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ur == null){
             
             this.ur = node = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ur");
@@ -73,7 +73,7 @@ Quadrant.prototype.urAddIf = function(entity){
 Quadrant.prototype.llAddIf = function(entity){
     //step 1 does this belong here
     var box = [this.x, this.y + this.sy / 2, this.sx/2, this.sy / 2];    
-    if( appLib.util.insideBox(entity.x, entity.y, box) ){
+    if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ll == null){
             
             this.ll = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ur");
@@ -88,7 +88,7 @@ Quadrant.prototype.llAddIf = function(entity){
 Quadrant.prototype.lrAddIf = function(entity){
     //step 1 does this belong here
     var box = [this.x + this.sx/2, this.y + this.sy / 2, this.sx/2, this.sy / 2];    
-    if( appLib.util.insideBox(entity.x, entity.y, box) ){
+    if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.lr == null){
             
             this.lr = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "lr");
@@ -110,6 +110,24 @@ Quadrant.prototype.contains  = function(x, y){
     return (x > this.x  && x < this.x + this.sx)
         && (y > this.y  && y < this.y + this.sy);
 }
+
+/**
+ *Does this quadrant hold a point of the provided box?
+ *
+ *@TODO extract this to possible Shapes library
+ *@argument x is either an X coordinate or a point
+ *@argument {Integer} y
+ */
+Quadrant.prototype.containsBox  = function(box){
+    /**
+     *AxMin > BxMax and AxMax > BxMin
+        AyMin > ByMax and AyMax > ByMin
+     */
+    //return (     
+    //return (this.x > box.x + box.sx  && x < this.x + this.sx)
+    //    && (y > this.y  && y < this.y + this.sy);
+}
+
 
 /**
  *High level Entity Add logic, focuses on where to route
@@ -177,8 +195,7 @@ Quadrant.prototype.loop = function(block){
  *an entity
  *
  *@param {Integer} x
- *@param {Integer} y
- *@param {Array} myTargets
+ *@param {Integer} y 
  *@returns {Array} returns all quadrants from top to bottom that contain an entity
  */
 Quadrant.prototype.find = function(x,y){
@@ -196,6 +213,27 @@ Quadrant.prototype.find = function(x,y){
         }
     }
     return myTargets;
+}
+
+/**
+ *Find all Quadrants from root to bottom tier that lead to
+ *an entity
+ *
+ *@param {Object} box has x,y and sx,sy properties
+ *@returns {Array} returns all quadrants from top to bottom that contain an entity
+ */
+Quadrant.prototype.findBox = function(box){
+    
+    if(this.entities == null){
+            var temp = [];
+            if(this.ul  && this.ul.containsBox(box))    temp = temp.concat( this.ul.findBox(box, myTargets));
+            if(this.ur  && this.ur.containsBox(box))    temp = temp.concat( this.ur.findBox(box, myTargets));
+            if(this.lr  && this.lr.containsBox(box))    temp = temp.concat( this.lr.findBox(box, myTargets));
+            if(this.ll  && this.ll.containsBox(box))    temp = temp.concat( this.ll.findBox(box, myTargets));
+            return temp;        
+    }else{
+        return [this];
+    }
 }
 
 function QuadrantFactory(ctx, max){

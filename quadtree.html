@@ -4,10 +4,9 @@
         <title>Mapping/partitioning</title>
         <script src="/js/jquery.js"></script>
         <!--<script type="text/javascript" src="/js/jquery.jstree.js"></script>-->
-        <script src="libs/app.core.js"></script>
-        <script src="libs/app.main.js"></script>
-        <script src="libs/app.shapes.js"></script>
-        <script src="libs/app.canvas.js"></script>
+        <script src="libs/ping.main.js"></script>
+        <script src="libs/ping.shapes.js"></script>
+        <script src="libs/ping.canvas.js"></script>
         <script src="/quadtree.js"></script>
         <script src="/quadtree.util.js"></script>
     </head>
@@ -23,19 +22,18 @@
             
             function run(){
                 
-                
                 var balls = [];
-                for(var bMax = 0; bMax < 6; bMax++){
+                for(var bMax = 0; bMax < 20; bMax++){
                     balls.push(ballFactory(600,400));                 
                 }
                 
-                var stepPos = 3;
-                ctx = appLib.$C("mapper");
+                var stepPos = 9;
+                ctx = ping.$C("mapper");
                 map = QuadrantFactory(ctx, stepPos);
                 
                 function runLogic(){
                     var highX = 0, highY = 0;
-                    ctx = appLib.$C("mapper");
+                    ctx = ping.$C("mapper");
                     delete map;
                     map = QuadrantFactory(ctx, stepPos);
                     for(var i = 0; i < balls.length; i++){

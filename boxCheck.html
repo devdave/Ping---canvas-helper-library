@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script src="libs/ping.main.js"></script>
+        <script src="libs/ping.intersection.js"></script>
+        <script src="libs/ping.canvas.js"></script>
+    </head>
+    <body>
+        <canvas width="600" height="400" id="boxCheck"></canvas>
+        <script>
+            ping.namespace("ping.box.intersects");
+        </script>
+        <script>
+            function ar2box(ar){
+                var box = {};
+                box.x   = ar[0];
+                box.y   = ar[1];
+                box.sx  = ar[2];
+                box.sy  = ar[3];
+                return box;
+            }
+            var ctx = ping.$C("boxCheck");
+            var a = ar2box([0,0,100,100]); //a 
+            var A = ar2box([50,50,125,125]); //A
+            var b = ar2box([125,0,100,100]); //b
+            var c = ar2box([125,125,100,100]); //b
+            var d = ar2box([0,125,100,100]);
+            var box = [A,a,b,c,d];
+            var index = ['A','a','b','c','d'];
+            
+            
+            
+            
+            for(var i = 0; i<box.length; i++){
+                for(var ii = 0; ii<box.length; ii++){
+                    console.log(index[i] , " intersects ", index[ii], " ",  ping.Lib.intersects.box(box[i], box[ii]) ? "true" : "false" )
+                    
+                }                 
+            }
+       
+        </script>
+    </body>
+</html>
