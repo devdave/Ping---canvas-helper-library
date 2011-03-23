@@ -4,9 +4,14 @@
         <script src="libs/ping.main.js"></script>
         <script src="libs/ping.intersection.js"></script>
         <script src="libs/ping.canvas.js"></script>
+        <script src="js/jquery.js"></script>
+        <style>
+         
+        </style>
     </head>
     <body>
         <canvas width="600" height="400" id="boxCheck"></canvas>
+        <ul style="float:right" id="console"></ul>
         <script>
             ping.namespace("ping.box.intersects");
         </script>
@@ -25,19 +30,34 @@
             var b = ar2box([125,0,100,100]); //b
             var c = ar2box([125,125,100,100]); //b
             var d = ar2box([0,125,100,100]);
-            var box = [A,a,b,c,d];
-            var index = ['A','a','b','c','d'];
-            
+            var e = ar2box([0,0,550,350]);
+            var box     = [ e,  A,  a,  b,  c,  d];
+            var index   = ['e','A','a','b','c','d'];
             
             
             
             for(var i = 0; i<box.length; i++){
+                
+                ctx.beginPath();
+                ctx.rect(box[i].x, box[i].y, box[i].sx, box[i].sy);
+                ctx.closePath();
+                ctx.stroke();
+
+
                 for(var ii = 0; ii<box.length; ii++){
-                    console.log(index[i] , " intersects ", index[ii], " ",  ping.Lib.intersects.box(box[i], box[ii]) ? "true" : "false" )
-                    
-                }                 
+                    if(ii == i){
+                        continue;
+                    }
+                    var txt = index[i] + " intersects "+ index[ii]+ " "+  (ping.Lib.intersects.box(box[i], box[ii]) ? "true" : "false");
+                    console.log(txt);
+                    $("#console").append($("<li>").text(txt));
+                }
+                ctx.beginPath();
+                ctx.fillText("Box " + index[i], box[i].x + (box[i].sx/2), box[i].y + (box[i].sy/2), 175 );
+                ctx.closePath();
+                ctx.stroke();
+
             }
-       
         </script>
     </body>
 </html>

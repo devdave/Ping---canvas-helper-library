@@ -47,7 +47,7 @@ Quadrant.prototype.ulAddIf = function(entity){
     var box = [this.x, this.y, this.sx/2, this.sy / 2];    
     if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ul == null){
-            this.ul = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ul");         
+            this.ul = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->ul");         
         }
         this.ul.add(entity);
         return true;
@@ -61,7 +61,7 @@ Quadrant.prototype.urAddIf = function(entity){
     if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ur == null){
             
-            this.ur = node = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ur");
+            this.ur = node = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->ur");
         }
         this.ur.add(entity);
         return true;
@@ -76,7 +76,7 @@ Quadrant.prototype.llAddIf = function(entity){
     if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ll == null){
             
-            this.ll = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "ur");
+            this.ll = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->ur");
         }
         this.ll.add(entity);
         return true;
@@ -91,7 +91,7 @@ Quadrant.prototype.lrAddIf = function(entity){
     if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.lr == null){
             
-            this.lr = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, "lr");
+            this.lr = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->lr");
         }
         this.lr.add(entity);
         return true;
@@ -119,6 +119,7 @@ Quadrant.prototype.contains  = function(x, y){
  *@argument {Integer} y
  */
 Quadrant.prototype.containsBox  = function(box){
+    return ping.Lib.intersects.box(this,box);
     /**
      *AxMin > BxMax and AxMax > BxMin
         AyMin > ByMax and AyMax > ByMin
@@ -226,10 +227,10 @@ Quadrant.prototype.findBox = function(box){
     
     if(this.entities == null){
             var temp = [];
-            if(this.ul  && this.ul.containsBox(box))    temp = temp.concat( this.ul.findBox(box, myTargets));
-            if(this.ur  && this.ur.containsBox(box))    temp = temp.concat( this.ur.findBox(box, myTargets));
-            if(this.lr  && this.lr.containsBox(box))    temp = temp.concat( this.lr.findBox(box, myTargets));
-            if(this.ll  && this.ll.containsBox(box))    temp = temp.concat( this.ll.findBox(box, myTargets));
+            if(this.ul  && this.ul.containsBox(box))    temp = temp.concat( this.ul.findBox(box));
+            if(this.ur  && this.ur.containsBox(box))    temp = temp.concat( this.ur.findBox(box));
+            if(this.lr  && this.lr.containsBox(box))    temp = temp.concat( this.lr.findBox(box));
+            if(this.ll  && this.ll.containsBox(box))    temp = temp.concat( this.ll.findBox(box));
             return temp;        
     }else{
         return [this];

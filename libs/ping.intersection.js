@@ -15,6 +15,14 @@ ping.Lib.intersects.box = function(a,b){
                //AUd lower left corner
                if(a.x >= b.x && a.x <= b.x + b.sx && a.y + a.sy >= b.y && a.y + a.sy <= b.y + b.sy) return true;
                
+               if(b.x >= a.x && b.x <= a.x + a.sx && b.y >= a.y && b.y <= a.y + a.sy) return true;
+               //AUb upper right corner
+               if(b.x + b.sx >= a.x && b.x + b.sx <= a.x + a.sx  && b.y >= a.y && b.y <= a.y + a.sy ) return true;
+               //AUc lower right corner
+               if(b.x + b.sx >= a.x && b.x + b.sx <= a.x + a.sx && b.y + b.sy >= a.y && b.y + b.sy <= a.y + a.sy) return true;
+               //AUd lower left corner
+               if(b.x >= a.x && b.x <= a.x + a.sx && b.y + b.sy >= a.y && b.y + b.sy <= a.y + a.sy) return true;
+               
                return false;
                 
             }

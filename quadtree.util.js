@@ -5,17 +5,26 @@
         (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) +
         (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
     }
+    
+    function Ball(maxX, maxY){
+        this.id = GUID();
+        this.x = Math.random()*maxX;
+        this.y =Math.random()*maxY;
+        this.sx = 10;
+        this.sy = 10;
+        this.dx =Math.random()*20 -10;
+        this.dy =Math.random()*20 -10;
+    }
+    Ball.prototype.bbox = function(){
+        return {"x": this.x-50, y:this.y-50,sx:100,sy:100}
+    }
+    Ball.prototype.step = function(){
+        this.x += this.dx;
+        this.y += this.dy;
+    }
 
     function ballFactory(maxX, maxY){
-        return {
-            id: GUID()
-            ,x: Math.random()*maxX
-            ,y:Math.random()*maxY
-            ,sx: 10
-            ,sy: 10
-            ,dx:Math.random()*5 + 1
-            ,dy:Math.random()*5 + 1
-        };
+        return new Ball(maxX, maxY)
     }
                 
     /**
@@ -23,8 +32,7 @@
      *but not sure how to work around it
      */
     function RunBall(ball, map){      
-        ball.x += ball.dx;
-        ball.y += ball.dy;
+        
         
         ball.dx = ball.dx * .95;
         ball.dy = ball.dy * .95;
@@ -41,12 +49,14 @@
         if(! ping.Lib.util.inside(ball.y, 0, 400)){
             ball.dy *= -1;
         }
-        map.add(ball);
+        
         return ball;
         }
         
     function RenderBall(ball, map, ctx){
-        var qs = map.find(Math.round(ball.x), Math.round(ball.y), qs);
+        var ballBoundBox = {};
+        var Bbox = ball.bbox();
+        var qs = map.findBox(Bbox, qs);
         var entity = null, quad = null, dist = null, color = "blue";
         for(var i = qs.length - 1; i >= 0; i--){
             if(qs[i].entities){
@@ -55,7 +65,7 @@
                     entity = quad.entities[e];
                     if(entity.id != ball.id){
                         dist = ping.Lib.pointDistance(ball.x, ball.y, entity.x, entity.y);
-                        if(dist < 250){
+                        if(ping.Lib.intersects.box(Bbox, entity.bbox())){
                             ctx.save();
                             ctx.beginPath();
                             ctx.strokeStyle = "RGB(64,90,"+ 256 - Math.round(dist)+")";
@@ -79,10 +89,14 @@
             }
         }
         ctx.save();
-        
+        ctx.beginPath();
+        ctx.rect(Bbox.x, Bbox.y,100,100);
+        ctx.closePath();
+        ctx.stroke();
         ctx.fillStyle  = color;
         ctx.strokeStyle = color;
         ctx.beginPath();
+        
         ctx.circle(ball.x,ball.y,10);
         ctx.closePath();
         ctx.fill();
