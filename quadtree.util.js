@@ -10,13 +10,13 @@
         this.id = GUID();
         this.x = Math.random()*maxX;
         this.y =Math.random()*maxY;
-        this.sx = 10;
-        this.sy = 10;
+        this.sx = 60;
+        this.sy = 60;
         this.dx =Math.random()*20 -10;
         this.dy =Math.random()*20 -10;
     }
     Ball.prototype.bbox = function(){
-        return {"x": this.x-50, y:this.y-50,sx:100,sy:100}
+        return {"x": this.x-50, y:this.y-50,sx:this.sx,sy:this.sx}
     }
     Ball.prototype.step = function(){
         this.x += this.dx;
@@ -34,14 +34,15 @@
     function RunBall(ball, map){      
         
         
-        ball.dx = ball.dx * .95;
-        ball.dy = ball.dy * .95;
-        if(Math.abs(ball.dx) < 1){
-            ball.dx = ball.dx > 0 ? 1 : -1;
+        ball.dx = ball.dx * .5;
+        ball.dy = ball.dy * .5;
+        if(Math.abs(ball.dx) < .5){
+            ball.dx = ball.dx > 0 ? .5 : -.5;
         }
-        if(Math.abs(ball.dy) < 1){
-            ball.dy = ball.dy > 0 ? 1 : -1;
+        if(Math.abs(ball.dy) < .5){
+            ball.dy = ball.dy > 0 ? .5 : -.5;
         }
+        
         
         if(! ping.Lib.util.inside(ball.x, 0, 600)){
             ball.dx *= -1;
@@ -65,21 +66,37 @@
                     entity = quad.entities[e];
                     if(entity.id != ball.id){
                         dist = ping.Lib.pointDistance(ball.x, ball.y, entity.x, entity.y);
-                        if(ping.Lib.intersects.box(Bbox, entity.bbox())){
+                        if(ping.Lib.intersects.box(Bbox, entity.bbox()) || false){
                             ctx.save();
                             ctx.beginPath();
-                            ctx.strokeStyle = "RGB(64,90,"+ 256 - Math.round(dist)+")";
+                            ctx.strokeStyle = "black";
                             ctx.moveTo(Math.round(ball.x),Math.round(ball.y));
                             ctx.lineTo(Math.round(entity.x), Math.round(entity.y));
                             ctx.closePath();
                             ctx.stroke();
                             ctx.restore();
                         }
-                        if(dist < 10){
+                        else if(dist<150){
+                            //ctx.save();
+                            //ctx.beginPath();
+                            //ctx.bezierCurveTo(ball.x, ball.y,300, 200, entity.x, entity.y );
+                            //ctx.closePath();
+                            //ctx.stroke();
+                        }
+                        if(dist < 15){
                             color = "red";
-                            var rXFactor = Math.random() * 100 / 100;
-                            entity.dx *= -1 + rXFactor;
-                            entity.dy *= -1 + rXFactor;
+                            ball.dx *= -1.5;
+                            ball.dy *= -1.5;
+                            ball.x += ball.dx * 5;
+                            ball.y += ball.dy * 5;
+                            
+                            entity.dx *= -1.5;
+                            entity.dy *= -1.5;
+                            entity.x += entity.dx * 5;
+                            entity.y += entity.dy * 5;
+                            
+                            
+                            quad.entities[e] = entity;
                             break;
                             
                         }
@@ -89,12 +106,12 @@
             }
         }
         ctx.save();
-        ctx.beginPath();
-        ctx.rect(Bbox.x, Bbox.y,100,100);
-        ctx.closePath();
-        ctx.stroke();
+        //ctx.beginPath();
+        //ctx.rect(Bbox.x, Bbox.y,100,100);
+        //ctx.closePath();
+        //ctx.stroke();
         ctx.fillStyle  = color;
-        ctx.strokeStyle = color;
+        //ctx.strokeStyle = color;
         ctx.beginPath();
         
         ctx.circle(ball.x,ball.y,10);

@@ -93,7 +93,7 @@
             /**
              *@property {CanvasRenderingContext2D} ctx The canvas interface
              */
-            this.ctx = appLib.$C(canvasID);
+            this.ctx = ping.$C(canvasID);
             this.ctx.strokeStyle = "black";
             this.debug = debug || false;
             

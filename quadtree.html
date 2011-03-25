@@ -16,6 +16,7 @@
         <canvas height="400" width="600" id="mapper"></canvas>
         <div class="statPanel" style="float:right">
             <label>Allow move<input type="checkbox" id="allowMove" checked></label>
+            <label>FPS (Est)<input type="text" value="" id="fps"></label>
             <br style="clear:both" />
             <ol id="wtf"></ol><br/>
             <label>Node list</label>
@@ -31,17 +32,23 @@
                     allowMovement = !allowMovement;
                     });
                 var balls = [];
-                for(var bMax = 0; bMax < 50; bMax++){
+                for(var bMax = 0; bMax < 150; bMax++){
                     balls.push(ballFactory(600,400));                 
                 }
                 
                 var stepPos = 9;
                 ctx = ping.$C("mapper");
                 map = QuadrantFactory(ctx, stepPos);
+                var fps = 0, now, lastUpdate = (new Date)*1 - 1;
+
+                // The higher this value, the less the FPS will be affected by quick changes
+                // Setting this to 1 will show you the FPS of the last sampled frame only
+                var fpsFilter = 50;
+                
                 
                 function runLogic(){
+                    var start = new Date().getTime();
                     var highX = 0, highY = 0;
-                    ctx = ping.$C("mapper");
                     delete map;
                     map = QuadrantFactory(ctx, stepPos);
                     for(var i = 0; i < balls.length; i++){
@@ -52,18 +59,30 @@
                             balls[i] = RunBall(balls[i], map, allowMovement);
                         }
                     }    
-                    if(allowMovement){
-                    }
                     
                     ctx.beginPath();
                     ctx.clearAll();
                     for(var i = 0; i < balls.length; i++){
                         balls[i] = RenderBall(balls[i], map, ctx)
                     }
-                    map.render(ctx);
-                    ctx.closePath();                    
+                    //map.render(ctx);
+                    ctx.closePath();
+                    setTimeout(runLogic,10);
+
+                    var thisFrameFPS = 1000 / ((now=new Date) - lastUpdate);
+                    fps += (thisFrameFPS - fps) / fpsFilter;
+                    lastUpdate = now;
+                    
                 }
-                setInterval(runLogic, 25);
+
+                    
+                    var fpsOut = $('#fps');
+                    setInterval(function(){
+                            fpsOut.val(fps.toFixed(1) + "fps");
+                    }, 1000);
+                    
+                    setTimeout(runLogic,0);
+
                
                
             };
