@@ -44,10 +44,10 @@
         }
         
         
-        if(! ping.Lib.util.inside(ball.x, 0, 600)){
+        if(! ping.Lib.util.inside(ball.x, 0, 575)){
             ball.dx *= -1;
         }
-        if(! ping.Lib.util.inside(ball.y, 0, 400)){
+        if(! ping.Lib.util.inside(ball.y, 0, 375)){
             ball.dy *= -1;
         }
         
@@ -83,7 +83,7 @@
                             //ctx.closePath();
                             //ctx.stroke();
                         }
-                        if(dist < 15){
+                        if(dist < 16){
                             color = "red";
                             ball.dx *= -1.5;
                             ball.dy *= -1.5;
