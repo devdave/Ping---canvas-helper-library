@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Motha F'ing Snakes in a Canvas tag</title>
+        <script src="libs/ping.main.js"></script>
+        <script src="libs/ping.shapes.js"></script>
+        <script src="libs/ping.canvas.js"></script>
+        <script src="libs/ping.intersection.js"></script>
+        <script src="libs/ping.qtree.js"></script>
+        <script src="js/jquery.js"></script>
+    </head>
+    <body>
+        <canvas id="snakeCan" height="400" width="600"></canvas>
+        <div style="float:right">
+            <input id="snakeLen" value="2" />
+            <br/>
+            <input id="snakeX" value="1" />
+            <input id="snakeY" value="1" />
+            <br/>
+            <input id="snakeLeft" type="button" value="left" />
+            <input id="snakeRight" type="button" value="right" />
+            <br/>
+            <span id="coords"></span>
+        </div>
+        <script>
+            ping.namespace("game.Lib");
+            var coords = $("#coords");
+            game.Lib.Snake = function(ctx){
+                this.ctx = ctx;
+                this.x = ctx.canvas.clientHeight / 2;
+                this.y = ctx.canvas.clientHeight / 2;
+                
+                this.dx = 0;
+                this.dy = 1;
+                this.maxLen = 2;
+                this.elements = [this.x,this.y];
+                this.maxFruits = 5;
+                this.fruits = [];
+            }
+            
+            game.Lib.Snake.prototype.tick = function(){
+                this.y += this.dy ;
+                this.x += this.dx;
+                
+                                
+                
+                if(this.y > this.ctx.canvas.clientHeight){
+                    this.y = 0;
+                }
+                else if(this.y < 0 ){
+                    this.y = this.ctx.canvas.clientHeight;
+                }
+                if(this.x > this.ctx.canvas.clientWidth){
+                    this.x = 0;
+                }
+                else if(this.x < 0 ){
+                    this.x = this.ctx.canvas.clientWidth;
+                }
+                coords.text(this.x + "," + this.y);
+            }
+            
+            
+            game.Lib.Snake.prototype.render = function(){
+                this.ctx.clearAll();
+                ctx.save();
+                ctx.fillStyle  = "blue";
+                //ctx.strokeStyle = color;
+                ctx.beginPath();
+                for(var i = 0; i < this.elements.length; i++){
+                    ctx.circle(this.elements[i][0],this.elements[i][1],10);           
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+            game.Lib.Snake.prototype.goRight = function(){
+                //(dx,dy)=(-dy,dx) (or (dy,-dx)
+                var dx = (-this.dy), dy = this.dx;                
+                this.dx = dx;
+                this.dy = dy;
+                
+                $("#snakeX").val(this.dx);
+                $("#snakeY").val(this.dy);
+                
+                
+            }
+            game.Lib.Snake.prototype.goLeft = function(){
+                //(dx,dy)=(-dy,dx) (or (dy,-dx)
+                var dx = (this.dy), dy = (-this.dx);             
+                this.dx = dx;
+                this.dy = dy;
+                $("#snakeX").val(this.dx);
+                $("#snakeY").val(this.dy);                
+                
+            }
+        </script>
+        <script>
+            var ctx = ping.$C("snakeCan");
+            var snake = new game.Lib.Snake(ctx);
+            var stepSize = 5 ;
+            function mainLoop(){
+                if(stepSize-- <= 0){
+                    snake.elements.unshift([snake.x, snake.y]);
+                    if(snake.elements.length > snake.maxLen){
+                        snake.elements.pop();    
+                    }
+                    snake.render();
+                    stepSize = 10;
+                }
+                snake.tick();
+                setTimeout(mainLoop, 50);
+            }
+            
+            $("#snakeLen").change(function(){
+                snake.maxLen = this.value;
+            });
+            $("#snakeX").keyup(function(){
+               snake.dx = parseFloat(this.value);
+               if(isNaN(snake.dx)){
+                    snake.dx = 1;
+               }
+            });
+            $("#snakeY").keyup(function(){
+               snake.dy = parseFloat(this.value);
+               if(isNaN(snake.dy)){
+                    snake.dy = 1;
+               }
+            });
+            $("#snakeLeft").click(function(){
+                snake.goLeft();
+                
+            });
+            
+            $("#snakeRight").click(function(){
+                snake.goRight();
+            });
+            
+            //var input = ping.Lib.initInput()
+            
+            
+            setTimeout(mainLoop, 10);
+            
+            
+        </script>
+    </body>
+</html>
