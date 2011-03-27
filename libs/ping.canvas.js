@@ -122,5 +122,14 @@ CanvasRenderingContext2D.prototype.clearAll = function(color){
                         this.clearRect(0,0,this.canvas.clientWidth, this.canvas.clientHeight );
                         }
 
+CanvasRenderingContext2D.prototype.maxHeight = function(){
+     return this.canvas.clientHeight;
+}
+
+CanvasRenderingContext2D.prototype.maxWidth = function(){
+     return this.canvas.clientWidth;
+}
+
+
 //To allow for documentation detection
 ping.Lib.CanvasRenderingContext2D = CanvasRenderingContext2D;
