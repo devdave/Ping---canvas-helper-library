@@ -8,89 +8,201 @@
         <script src="libs/ping.intersection.js"></script>
         <script src="libs/ping.qtree.js"></script>
         <script src="js/jquery.js"></script>
+        <style>
+            #snakeCan {                
+                border: 1px solid black;
+            }
+        </style>
+               
     </head>
     <body>
-        <canvas id="snakeCan" height="400" width="600"></canvas>
+        <div id="canContainer" style="float:left">
+            <canvas id="snakeCan" height="400" width="600"></canvas>
+        </div>
         <div style="float:right">
             <input id="snakeLen" value="2" />
             <br/>
             <input id="snakeX" value="1" />
             <input id="snakeY" value="1" />
             <br/>
-            <input id="snakeLeft" type="button" value="left" />
-            <input id="snakeRight" type="button" value="right" />
-            <br/>
             <span id="coords"></span>
         </div>
         <script>
+            
+        
             ping.namespace("game.Lib");
+            
+            game.Lib.Entity = function(x,y,sx,sy,dx,dy, color){
+                this.id = this.GUID();
+                this.x = x;
+                this.y = y;
+                this.sx = sx;
+                this.sy = sy;
+                this.dx = dx;
+                this.dy = dy;
+                this.color = color || "blue";
+                this.type = "UNK";
+            }
+            
+            game.Lib.Entity.prototype.tick = function(){                
+                this.x += this.dx;
+                this.y += this.dy;
+                
+            }
+            
+            game.Lib.Entity.prototype.copy = function(){
+                return new game.Lib.Entity(this.x, this.y, this.sx, this.sy, this.dx, this.dy, this.color);
+            }
+            
+            game.Lib.Entity.prototype.render = function(ctx){                
+                ctx.fillStyle = this.color;
+                ctx.circle(Math.floor(this.x),Math.floor(this.y), this.sx);                
+            }
+            
+            game.Lib.Entity.prototype.GUID = function(){
+                return new Date().getTime() +
+                (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) + 
+                (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) +
+                (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+            }
+            
+            
+
+            
+            
+            
             var coords = $("#coords");
             game.Lib.Snake = function(ctx){
                 this.ctx = ctx;
-                this.x = ctx.canvas.clientHeight / 2;
-                this.y = ctx.canvas.clientHeight / 2;
-                
-                this.dx = 0;
-                this.dy = 1;
+                this.avatar = new game.Lib.Entity(ctx.canvas.clientHeight / 2
+                                                  ,ctx.canvas.clientHeight / 2
+                                                  ,10
+                                                  ,10
+                                                  ,1
+                                                  ,0
+                                                  ,"blue"
+                                                 );
+                                 
+                //Body elements
                 this.maxLen = 2;
-                this.elements = [this.x,this.y];
-                this.maxFruits = 5;
+                this.elements = [this.avatar.copy()];
+                
+                //Fruit elements
+                this.maxFruits = 5;                
                 this.fruits = [];
+                this.map = null;
             }
             
             game.Lib.Snake.prototype.tick = function(){
-                this.y += this.dy ;
-                this.x += this.dx;
                 
-                                
+                this.avatar.tick();
                 
-                if(this.y > this.ctx.canvas.clientHeight){
-                    this.y = 0;
+                if(this.map){
+                    delete this.map;
                 }
-                else if(this.y < 0 ){
-                    this.y = this.ctx.canvas.clientHeight;
+                this.map = new ping.Lib.Quadrant(0,0,ctx.maxWidth(), ctx.maxHeight(), 6);
+                this.map.add(this.avatar);
+                
+                
+                if(this.avatar.y > this.ctx.canvas.clientHeight){
+                    this.avatar.y = 0;
                 }
-                if(this.x > this.ctx.canvas.clientWidth){
-                    this.x = 0;
+                else if(this.avatar.y < 0 ){
+                    this.avatar.y = this.ctx.canvas.clientHeight;
                 }
-                else if(this.x < 0 ){
-                    this.x = this.ctx.canvas.clientWidth;
+                if(this.avatar.x > this.ctx.canvas.clientWidth){
+                    this.avatar.x = 0;
                 }
-                coords.text(this.x + "," + this.y);
+                else if(this.avatar.x < 0 ){
+                    this.avatar.x = this.ctx.canvas.clientWidth;
+                }
+                
+                if(this.fruits.length < this.maxFruits){
+                    if(Math.floor(Math.random()*10) == 1){
+                        var fX = Math.random() * this.ctx.maxWidth();
+                        var fY = Math.random() * this.ctx.maxHeight();
+                        
+                                            
+                        var fruit = new game.Lib.Entity(fX, fY, 5,5,0,0,"red");
+                        fruit.type = "FRUIT";
+                        this.fruits.unshift(fruit);
+                    }                    
+                }
+                if(this.fruits.length > 0){
+                    for(var f = 0; f < this.fruits.length; f++){                    
+                        this.map.add(this.fruits[f]);
+                    }
+                }
+                
+                
+                var conflicts = this.map.findBox(this.avatar);
+                if(conflicts.length > 1){
+                    var entity = null;
+                    while(entity = conflicts.pop()){
+                        var dist = ping.Lib.pointDistance(this.avatar.x, this.avatar.y, entity.x, entity.y);
+                        if(entity.type == "FRUIT" && dist <= 10 ){
+                            this.maxLen += 2;
+                            var survivors = [];
+                            var fruit = null;
+                            while(fruit = this.fruits.pop()){
+                                if(fruit.id != entity.id){
+                                    survivors.push(fruit);
+                                }
+                            }                            
+                            this.fruits = survivors;
+                        }
+                    }
+                }
+                
+                
+                
+                coords.text(this.avatar.x + "," + this.avatar.y);
             }
             
             
             game.Lib.Snake.prototype.render = function(){
                 this.ctx.clearAll();
-                ctx.save();
-                ctx.fillStyle  = "blue";
-                //ctx.strokeStyle = color;
-                ctx.beginPath();
+                ctx.save();                                
+                ctx.beginPath();                
                 for(var i = 0; i < this.elements.length; i++){
-                    ctx.circle(this.elements[i][0],this.elements[i][1],10);           
+                    this.elements[i].render(this.ctx);                    
                 }
                 ctx.closePath();
                 ctx.fill();
                 ctx.restore();
+                
+                if(this.fruits.length > 0){
+                    
+                
+                    ctx.save();
+                    ctx.beginPath();
+                    for(var f = 0; f < this.fruits.length; f++){
+                        this.fruits[f].render(this.ctx);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+                
             }
             game.Lib.Snake.prototype.goRight = function(){
                 //(dx,dy)=(-dy,dx) (or (dy,-dx)
-                var dx = (-this.dy), dy = this.dx;                
-                this.dx = dx;
-                this.dy = dy;
+                var dx = (-this.avatar.dy), dy = this.avatar.dx;                
+                this.avatar.dx = dx;
+                this.avatar.dy = dy;
                 
-                $("#snakeX").val(this.dx);
-                $("#snakeY").val(this.dy);
+                $("#snakeX").val(this.avatar.dx);
+                $("#snakeY").val(this.avatar.dy);
                 
                 
             }
             game.Lib.Snake.prototype.goLeft = function(){
                 //(dx,dy)=(-dy,dx) (or (dy,-dx)
-                var dx = (this.dy), dy = (-this.dx);             
-                this.dx = dx;
-                this.dy = dy;
-                $("#snakeX").val(this.dx);
-                $("#snakeY").val(this.dy);                
+                var dx = (this.avatar.dy), dy = (-this.avatar.dx);             
+                this.avatar.dx = dx;
+                this.avatar.dy = dy;
+                $("#snakeX").val(dx);
+                $("#snakeY").val(dy);                
                 
             }
         </script>
@@ -100,40 +212,46 @@
             var stepSize = 5 ;
             function mainLoop(){
                 if(stepSize-- <= 0){
-                    snake.elements.unshift([snake.x, snake.y]);
+                    snake.elements.unshift(snake.avatar.copy());
                     if(snake.elements.length > snake.maxLen){
                         snake.elements.pop();    
                     }
-                    snake.render();
-                    stepSize = 10;
-                }
+                    
+                    stepSize = 5;
+                }                
                 snake.tick();
-                setTimeout(mainLoop, 50);
+                snake.render();
+                setTimeout(mainLoop,10);
             }
             
             $("#snakeLen").change(function(){
                 snake.maxLen = this.value;
             });
             $("#snakeX").keyup(function(){
-               snake.dx = parseFloat(this.value);
-               if(isNaN(snake.dx)){
-                    snake.dx = 1;
+               snake.avatar.dx = parseFloat(this.value);
+               if(isNaN(snake.avatar.dx)){
+                    snake.avatar.dx = 1;
                }
             });
             $("#snakeY").keyup(function(){
-               snake.dy = parseFloat(this.value);
-               if(isNaN(snake.dy)){
-                    snake.dy = 1;
+               snake.avatar.dy = parseFloat(this.value);
+               if(isNaN(snake.avatar.dy)){
+                    snake.avatar.dy = 1;
                }
             });
-            $("#snakeLeft").click(function(){
-                snake.goLeft();
+            $(document).keyup(function(evnt){
+                var key = evnt.which;
+                switch(key){
+                    case 37:
+                        snake.goLeft();
+                        break;
+                    case 39:
+                        snake.goRight();
+                        break;
+                }
                 
-            });
-            
-            $("#snakeRight").click(function(){
-                snake.goRight();
-            });
+                });
+           
             
             //var input = ping.Lib.initInput()
             
