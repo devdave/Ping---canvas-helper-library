@@ -7,6 +7,7 @@
         <script src="libs/ping.canvas.js"></script>
         <script src="libs/ping.intersection.js"></script>
         <script src="libs/ping.qtree.js"></script>
+        <script src="libs/ping.entities.js"></script>
         <script src="js/jquery.js"></script>
         <style>
             #snakeCan {                
@@ -32,49 +33,11 @@
         
             ping.namespace("game.Lib");
             
-            game.Lib.Entity = function(x,y,sx,sy,dx,dy, color){
-                this.id = this.GUID();
-                this.x = x;
-                this.y = y;
-                this.sx = sx;
-                this.sy = sy;
-                this.dx = dx;
-                this.dy = dy;
-                this.color = color || "blue";
-                this.type = "UNK";
-            }
-            
-            game.Lib.Entity.prototype.tick = function(){                
-                this.x += this.dx;
-                this.y += this.dy;
-                
-            }
-            
-            game.Lib.Entity.prototype.copy = function(){
-                return new game.Lib.Entity(this.x, this.y, this.sx, this.sy, this.dx, this.dy, this.color);
-            }
-            
-            game.Lib.Entity.prototype.render = function(ctx){                
-                ctx.fillStyle = this.color;
-                ctx.circle(Math.floor(this.x),Math.floor(this.y), this.sx);                
-            }
-            
-            game.Lib.Entity.prototype.GUID = function(){
-                return new Date().getTime() +
-                (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) + 
-                (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1) +
-                (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-            }
-            
-            
-
-            
-            
             
             var coords = $("#coords");
             game.Lib.Snake = function(ctx){
                 this.ctx = ctx;
-                this.avatar = new game.Lib.Entity(ctx.canvas.clientHeight / 2
+                this.avatar = new ping.Lib.ents.Entity(ctx.canvas.clientHeight / 2
                                                   ,ctx.canvas.clientHeight / 2
                                                   ,10
                                                   ,10
@@ -123,7 +86,7 @@
                         var fY = Math.random() * this.ctx.maxHeight();
                         
                                             
-                        var fruit = new game.Lib.Entity(fX, fY, 5,5,0,0,"red");
+                        var fruit = new ping.Lib.ents.Entity(fX, fY, 5,5,0,0,"red");
                         fruit.type = "FRUIT";
                         this.fruits.unshift(fruit);
                     }                    
@@ -163,24 +126,30 @@
             game.Lib.Snake.prototype.render = function(){
                 this.ctx.clearAll();
                 ctx.save();                                
-                ctx.beginPath();                
+                                
                 for(var i = 0; i < this.elements.length; i++){
-                    this.elements[i].render(this.ctx);                    
+                    ctx.beginPath();
+                    this.elements[i].render(this.ctx);
+                    ctx.closePath();
+                    ctx.fill();
+
+
                 }
-                ctx.closePath();
-                ctx.fill();
                 ctx.restore();
                 
                 if(this.fruits.length > 0){
                     
                 
                     ctx.save();
-                    ctx.beginPath();
                     for(var f = 0; f < this.fruits.length; f++){
+                                            ctx.beginPath();
+
                         this.fruits[f].render(this.ctx);
+                                            ctx.closePath();
+                                            ctx.fill();
+
+
                     }
-                    ctx.closePath();
-                    ctx.fill();
                     ctx.restore();
                 }
                 

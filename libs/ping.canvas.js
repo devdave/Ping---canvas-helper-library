@@ -1,6 +1,23 @@
-
+/**
+ *Canvas additions library
+ *
+ *Adds some useful new methods and helpers to the canvas
+ *Instance
+ *
+ */
 ping.namespace("ping.Lib");
 
+/**
+ *A canvas instance manager
+ *
+ *It's pretty rare to create & destroy canvas's from the DOM
+ *so it make sense to an extent to try and cache the reference
+ *to the 2d Rendering context...thereby avoiding continual
+ *DOM getElementBy Id calls.
+ *
+ *This is considered an internal library utility and shouldn't
+ *be called directly
+ */
 ping.Lib.CnvMan = function(){
      this.refs = {};
      this.count = 0;
@@ -33,6 +50,12 @@ ping.Lib.CnvMan.prototype.exists = function(id){
 ping.cMngr = new ping.Lib.CnvMan();
 
 
+/**
+ *Utility to instantiate/retrieve the 2d Rendering context of canvas tags
+ *
+ *This is also a future safe measure in case the 2d Rendering context should ever change,
+ *all of the add on methods can be bound at call time instead of compile time.
+ */
 ping.$C = function(elemId){
    if(ping.cMngr.exists(elemId)){
        return ping.cMngr.get(elemId);
@@ -42,6 +65,14 @@ ping.$C = function(elemId){
    return ping.cMngr.set(elemId, ref);
 }
 
+/**
+ *@deprecated
+ *Initially was meant to be a utility to ensure
+ *drawing sections of code were always wrapped with a begin..end path calls
+ *
+ *Unfortunately this turned out to be an amazing nightmare performance
+ *killing swamp.  Closures and very high performance DO NOT mix!
+ */
 CanvasRenderingContext2D.prototype.render = function(block){
                         this.beginPath();
                         //@TODO add try/catch here?
@@ -51,17 +82,25 @@ CanvasRenderingContext2D.prototype.render = function(block){
 }
 
 
-CanvasRenderingContext2D.prototype.drawLine = function(p1, p2){
-                            this.render(function(){
-                               this.line(p1,p2);                        
-                            });
-                            this.ctx.stroke();
-                    };
+/**
+ *A utility to take ping Point classes and render out a line.
+ *
+ *Currently not used anywhere
+ */
+CanvasRenderingContext2D.prototype.drawLine = function(p1, p2){ this.line(p1,p2); };
     
     
-    /**
-     *Given a Radi & angel value, return points on a circle
-     */
+/**
+ *Given a Radi & angle value, return points on a circle
+ *
+ *This is heavily used by the PingGame itself so should be considered stable
+ *
+ *@param {inter} Radius is the distence from the x,y coordinates
+ *@param {float} angle is a relatively sane angle from 0-360
+ *@param {float} x is the x coordinate for the center of the circle
+ *@param {float} y is the y coordinate for the center of the circle
+ *
+ */
 CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, x, y){
                        var radian = angle * Math.PI/180;
                         var lx = Radius * (Math.cos(radian)) + x;
@@ -69,6 +108,13 @@ CanvasRenderingContext2D.prototype.rayGen = function(Radius, angle, x, y){
                         return [lx, ly];
                 };
                 
+/**
+ *Draws an elliptical circle on the canvas.
+ *Ratio reflects on warped the circle gets
+ *
+ *@see Solar
+ *
+ */
 CanvasRenderingContext2D.prototype.elipGen = function(Radius, angle, originX, originY, ratio ){
                         ratio = /*ratio ||*/ 1.8;
                         var radian = angle * Math.PI/180;
@@ -77,12 +123,12 @@ CanvasRenderingContext2D.prototype.elipGen = function(Radius, angle, originX, or
                         return [lx, ly];
 };
 
+/**
+ *
+ */
 CanvasRenderingContext2D.prototype.line = function(p1, p2){
-            
-                    this.render(function(){
-                        this.moveTo(p2.x, p2.y);                        
-                        this.lineTo(p1.x, p1.y);                    
-                    });
+                    this.moveTo(p2.x, p2.y);                        
+                    this.lineTo(p1.x, p1.y);            
                 };
     
 CanvasRenderingContext2D.prototype.circle = function(x, y, radius) {
