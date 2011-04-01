@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <script src="libs/ping.main.js"></script>
+        <script src="libs/ping.shapes.js"></script>
+        <script src="libs/ping.canvas.js"></script>
+        <script src="libs/ping.intersection.js"></script>
+        <script src="libs/ping.qtree.js"></script>
+        <script src="libs/ping.entities.js"></script>
+        <script src="/libs/ping.util.js"></script>
+        <script src="js/jquery.js"></script>
+        <script src="games/dblbuffer.js"></script>
+    </head>
+    
+    <body>
+        <canvas id="dblCan" height="400" width="600">If you can see this, your browser sucks</canvas>
+        <canvas id="dblCan2" style="display:none" height="400" width="600">If you can see this, your browser sucks</canvas>
+        <script>
+            var grid = new game.Lib.Grid(ping.$C("dblCan"), .05, .05);
+            grid.render();
+        </script>
+    </body>
+</html>
