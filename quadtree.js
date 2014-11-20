@@ -8,7 +8,7 @@ ping.Lib.util.insideBox = function(x,y, box){
     var eY = box.y || box[1];
     var sx = box.sx || box[2];
     var sy = box.sy || box[3];
-    return (( ping.Lib.util.inside(x, eX, eX + sx)) && (ping.Lib.util.inside(y, eY, eY +sy)))    
+    return (( ping.Lib.util.inside(x, eX, eX + sx)) && (ping.Lib.util.inside(y, eY, eY +sy)))
 }
 
 /**
@@ -22,7 +22,7 @@ ping.Lib.util.insideBox = function(x,y, box){
  *@argument {integer} ly lower right y coordinate
  *@argument {Integer} depth determines how many more quadrants to descend down
  */
-function Quadrant(x, y, sx, sy, depth, name){  
+function Quadrant(x, y, sx, sy, depth, name){
     this.x = x;
     this.y = y;
     this.sx = sx;
@@ -38,16 +38,16 @@ function Quadrant(x, y, sx, sy, depth, name){
     this.ur = null;
     /* @property {Quadrant} lr Lower right*/
     this.lr = null;
-    
+
 
 }
 
 Quadrant.prototype.ulAddIf = function(entity){
     //step 1 does this belong here
-    var box = [this.x, this.y, this.sx/2, this.sy / 2];    
+    var box = [this.x, this.y, this.sx/2, this.sy / 2];
     if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ul == null){
-            this.ul = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->ul");         
+            this.ul = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->ul");
         }
         this.ul.add(entity);
         return true;
@@ -57,40 +57,40 @@ Quadrant.prototype.ulAddIf = function(entity){
 
 Quadrant.prototype.urAddIf = function(entity){
     //step 1 does this belong here
-    var box = [this.x + this.sx/2, this.y, this.sx/2, this.sy / 2];    
+    var box = [this.x + this.sx/2, this.y, this.sx/2, this.sy / 2];
     if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ur == null){
-            
+
             this.ur = node = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->ur");
         }
         this.ur.add(entity);
         return true;
     }
     return false;
-    
+
 }
 
 Quadrant.prototype.llAddIf = function(entity){
     //step 1 does this belong here
-    var box = [this.x, this.y + this.sy / 2, this.sx/2, this.sy / 2];    
+    var box = [this.x, this.y + this.sy / 2, this.sx/2, this.sy / 2];
     if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.ll == null){
-            
+
             this.ll = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->ur");
         }
         this.ll.add(entity);
         return true;
     }
     return false;
-                
+
 }
 
 Quadrant.prototype.lrAddIf = function(entity){
     //step 1 does this belong here
-    var box = [this.x + this.sx/2, this.y + this.sy / 2, this.sx/2, this.sy / 2];    
+    var box = [this.x + this.sx/2, this.y + this.sy / 2, this.sx/2, this.sy / 2];
     if( ping.Lib.util.insideBox(entity.x, entity.y, box) ){
         if(this.lr == null){
-            
+
             this.lr = new Quadrant(box[0], box[1], box[2], box[3],   this.depth - 1, this.name + "->lr");
         }
         this.lr.add(entity);
@@ -124,7 +124,7 @@ Quadrant.prototype.containsBox  = function(box){
      *AxMin > BxMax and AxMax > BxMin
         AyMin > ByMax and AyMax > ByMin
      */
-    //return (     
+    //return (
     //return (this.x > box.x + box.sx  && x < this.x + this.sx)
     //    && (y > this.y  && y < this.y + this.sy);
 }
@@ -137,18 +137,18 @@ Quadrant.prototype.containsBox  = function(box){
  *@property {x,y,sx,sy} All information needed to map out a box shape
  */
 Quadrant.prototype.add = function(entity){
-    
+
     //Has this quadrant divided already?
     if(this.entities == null){
         this.lrAddIf(entity) || this.urAddIf(entity) || this.llAddIf(entity) || this.ulAddIf(entity);
         return;
-    }    
+    }
     //Should this quadrant be divided?
     if(this.entities.length >= 1 && this.depth > 1 ){
-        //This Quadrant has become crowded, flush out all entities down the next level        
+        //This Quadrant has become crowded, flush out all entities down the next level
         this.entities.push(entity);
         this.divide();
-        this.entities = null;        
+        this.entities = null;
     }else{
         //No, push entity to this Quadrant
         this.entities.push(entity);
@@ -162,7 +162,7 @@ Quadrant.prototype.add = function(entity){
 Quadrant.prototype.divide = function(){
     var entity = null;
     while(entity = this.entities.pop()){
-        
+
         var failed = this.lrAddIf(entity) || this.urAddIf(entity) || this.llAddIf(entity) || this.ulAddIf(entity)
         //if(failed == false){
         //    throw {msg:"Could not place entity"};
@@ -177,7 +177,7 @@ Quadrant.prototype.render = function(ctx, depth){
     if(this.ur) this.ur.render(ctx, depth -1);
     if(this.lr) this.lr.render(ctx, depth -1);
     if(this.ll) this.ll.render(ctx, depth -1);
-    
+
 }
 
 Quadrant.prototype.loop = function(block){
@@ -196,7 +196,7 @@ Quadrant.prototype.loop = function(block){
  *an entity
  *
  *@param {Integer} x
- *@param {Integer} y 
+ *@param {Integer} y
  *@returns {Array} returns all quadrants from top to bottom that contain an entity
  */
 Quadrant.prototype.find = function(x,y){
@@ -224,14 +224,14 @@ Quadrant.prototype.find = function(x,y){
  *@returns {Array} returns all quadrants from top to bottom that contain an entity
  */
 Quadrant.prototype.findBox = function(box){
-    
+
     if(this.entities == null){
             var temp = [];
             if(this.ul  && this.ul.containsBox(box))    temp = temp.concat( this.ul.findBox(box));
             if(this.ur  && this.ur.containsBox(box))    temp = temp.concat( this.ur.findBox(box));
             if(this.lr  && this.lr.containsBox(box))    temp = temp.concat( this.lr.findBox(box));
             if(this.ll  && this.ll.containsBox(box))    temp = temp.concat( this.ll.findBox(box));
-            return temp;        
+            return temp;
     }else{
         return [this];
     }
@@ -247,6 +247,3 @@ function QuadrantFactory(ctx, max){
 (function(){
     console.log("Test here!");
 }());
-
-
-
